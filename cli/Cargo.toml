@@ -1,0 +1,23 @@
+[package]
+name = "rig"
+version = "5.0.0"
+edition = "2021"
+description = "Harness-Core workflow framework CLI"
+license = "MIT"
+repository = "https://github.com/xuanhoatrieu/rig"
+
+[[bin]]
+name = "rig"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+rusqlite = { version = "0.31", features = ["bundled"] }
+chrono = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true

@@ -1,0 +1,12 @@
+{
+  "name": "rig-education",
+  "version": "1.0.0",
+  "description": "Education workflows for Rig: textbook, PPTX, quiz generation, video, export",
+  "workflows": [
+    "workflows/textbook.md",
+    "workflows/pptx.md",
+    "workflows/question.md",
+    "workflows/video.md",
+    "workflows/export.md"
+  ]
+}
