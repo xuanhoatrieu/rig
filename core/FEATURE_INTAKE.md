@@ -1,6 +1,8 @@
 # Feature Intake
 
-Every implementation prompt enters the intake gate before code changes.
+Every implementation prompt enters the intake gate before code changes. A new
+project spec also enters through this gate before it becomes product docs,
+stories, or implementation work.
 
 The human does not need to classify risk. The harness does.
 
@@ -8,93 +10,138 @@ The human does not need to classify risk. The harness does.
 
 ```text
 User prompt
-    → Classify input type
-    → Restate as work item
-    → Find affected product docs and stories
-    → Run risk checklist
-    → Choose lane: tiny, normal, or high-risk
-    → Record: rig intake --type <type> --summary <text> --lane <lane>
+    |
+    v
+Classify input type
+    |
+    v
+Restate as work item
+    |
+    v
+Find affected product docs and stories
+    |
+    v
+Run risk checklist
+    |
+    v
+Choose lane: tiny, normal, or high-risk
 ```
 
 ## Input Types
 
+Use the input type to decide where the work should land before choosing the risk
+lane.
+
 | Type | Use when | Typical artifact |
 | --- | --- | --- |
-| New spec | Turning a spec into harness-ready docs | Product docs, story candidates, decisions |
-| Spec slice | Implementing selected behavior from accepted spec | Story packet |
+| New spec | Turning a user-provided project spec into harness-ready docs | Product docs, candidate epics, decisions |
+| Spec slice | Implementing selected behavior from an accepted spec | Story packet |
 | Change request | Changing, fixing, or refining accepted behavior | Story packet or direct patch |
-| New initiative | Larger product area needing multiple stories | Initiative notes + story packets |
-| Maintenance | Dependency, architecture, performance, or security work | Story packet or validation report |
+| New initiative | Adding a larger product area that needs multiple stories | Initiative notes plus story packets |
+| Maintenance request | Changing technical, operational, or dependency behavior | Story packet, validation report, or decision |
 | Harness improvement | Improving how humans and agents collaborate | Direct docs update or `rig backlog add` |
+
+Do not create or extend a monolithic spec by default after intake. Use product
+docs, stories, decisions, and initiative notes as the living surface.
 
 ## Lanes
 
 ### Tiny
 
-Low-risk docs, copy, names, narrow edits, or initial project scaffolding.
+Use for low-risk docs, copy, names, or narrow edits.
+
+Also use for initial project setup when the work is limited to installing
+declared dependencies, wiring a server entrypoint, adding a health/smoke
+endpoint, or opening a local development database connection without creating
+domain schema, CRUD behavior, auth, authorization, provider integration, or
+data migration.
 
 Requirements:
+
+- Record the intake row before implementation; tiny work skips story packet
+  overhead, not durable task classification.
 - Patch directly.
 - Keep affected docs current.
 - Run available quick checks.
+- Update the harness only if friction was found.
 
 ### Normal
 
-Story-sized behavior with bounded blast radius.
+Use for story-sized behavior with bounded blast radius.
 
 Requirements:
+
 - Create or update one story file from `core/templates/story.md`.
 - Link relevant product docs.
 - Add or update validation expectations.
-- Record proof status: `rig story add` / `rig story update`.
+- Implement the smallest vertical slice when implementation exists.
+- Record or update proof status with `rig story add` and `rig story update`.
 
 ### High-Risk
 
-Work affecting security, data, scope, contracts, or multiple roles/platforms.
+Use when the work can affect security, data, scope, contracts, or multiple
+roles/platforms.
 
 Requirements:
+
 - Create a story folder using `core/templates/high-risk-story/`.
-- Fill in overview.md, design.md, execplan.md, validation.md.
-- Ask human confirmation before implementation.
-- Record durable decision: `rig decision add`.
+- Fill in `execplan.md`, `overview.md`, `design.md`, and `validation.md`.
+- Ask for human confirmation before implementation if direction is ambiguous.
+- Record a durable decision when behavior, architecture, authorization, data
+  ownership, API shape, or validation requirements change meaningfully. Use a
+  `docs/decisions/NNNN-*.md` file from `core/templates/decision.md`, then add
+  or refresh the durable row with `rig decision add`.
 
 ## Risk Checklist
 
+Mark one flag for each item that applies:
+
 | Risk flag | Applies when the work touches |
 | --- | --- |
-| Auth | Login, logout, sessions, JWT, password, refresh token |
-| Authorization | Roles, permissions, tenant scope |
-| Data model | Schema, migrations, uniqueness, deletion, retention |
-| Audit/security | Audit logs, privacy, sensitive data |
-| External systems | Email, payments, cloud services, webhooks |
+| Auth | login, logout, sessions, JWT, password, refresh token |
+| Authorization | roles, permissions, tenant or company scope |
+| Data model | schema, migrations, uniqueness, deletion, retention |
+| Audit/security | audit logs, privacy, sensitive data, access logs |
+| External systems | email, payments, cloud services, provider SDKs, queues, webhooks |
 | Public contracts | API shape, response envelope, client-visible behavior |
-| Cross-platform | Desktop/mobile/browser split, native behavior |
-| Existing behavior | Already implemented or test-covered behavior changes |
-| Weak proof | Unclear or missing tests around affected area |
-| Multi-domain | More than one product domain changes at once |
+| Cross-platform | desktop/mobile/browser split, native shell behavior, deep links |
+| Existing behavior | already implemented or test-covered behavior changes |
+| Weak proof | unclear or missing tests around the affected area |
+| Multi-domain | more than one product domain changes at once |
 
 ## Classification
 
 ```text
-0-1 flags  → tiny or normal (based on code impact)
-2-3 flags  → normal with stronger validation
-4+ flags   → high-risk
+0-1 flags:
+  tiny or normal, based on code impact
+
+2-3 flags:
+  normal with stronger validation
+
+4+ flags:
+  high-risk
+
+Any hard gate:
+  high-risk unless the human explicitly narrows scope
 ```
 
-Hard gates (auto high-risk):
-- Auth
-- Authorization
-- Data loss or migration
-- Audit/security
-- External provider behavior
+Hard gates:
+
+- Auth.
+- Authorization.
+- Data loss or migration.
+- Audit/security.
+- External provider behavior.
+- Removing or weakening validation requirements.
 
 ## Output
 
-After intake, the agent states:
+At the end of intake, the agent should be able to say:
 
 ```text
 Lane: normal
-Reason: touches authorization and API contract.
-Story: docs/stories/US-014-manager-updates-role.md
-Validation: unit, integration.
+Reason: touches authorization, API contract, and audit behavior.
+Docs: permissions, account-settings, audit-log.
+Story: docs/stories/epics/E02-access-control/US-014-manager-updates-role.md.
+Validation: unit, integration, E2E.
 ```
