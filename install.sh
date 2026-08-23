@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Rig v5.0 Installer — Harness-Core Workflow Framework
+# Rig v5.1.0 Installer — Harness-Core Workflow Framework
 # Usage: curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash
 
-VERSION="5.0.0"
+VERSION="5.1.0"
 REPO="xuanhoatrieu/rig"
 GEMINI_DIR="$HOME/.gemini"
 ANTIGRAVITY_DIR="$GEMINI_DIR/antigravity"
@@ -33,19 +33,27 @@ DOWNLOAD_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${BINARY_
 
 # ─── Create directories ───
 mkdir -p "$ANTIGRAVITY_DIR/core/templates/high-risk-story"
+mkdir -p "$ANTIGRAVITY_DIR/core/patterns"
 mkdir -p "$ANTIGRAVITY_DIR/workflows"
+mkdir -p "$ANTIGRAVITY_DIR/skills"
 mkdir -p "$BIN_DIR"
 
-# ─── Download rig binary ───
-echo "📦 Downloading rig binary for ${OS_TARGET}-${ARCH_TARGET}..."
-if command -v curl &>/dev/null; then
+# ─── Download or build rig binary ───
+echo "📦 Installing rig binary..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
+    cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
+    chmod +x "$BIN_DIR/rig"
+    echo "✅ rig binary installed from local release build"
+elif [ -d "$SCRIPT_DIR/cli" ] && command -v cargo &>/dev/null; then
+    echo "🔨 Building rig from source with cargo..."
+    cargo build --release --manifest-path "$SCRIPT_DIR/cli/Cargo.toml"
+    cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
+    chmod +x "$BIN_DIR/rig"
+    echo "✅ rig binary built and installed to $BIN_DIR/rig"
+elif command -v curl &>/dev/null; then
     curl -fsSL "$DOWNLOAD_URL" -o "$BIN_DIR/rig" 2>/dev/null || {
-        echo "⚠️  Binary download failed. You can build from source:"
-        echo "   cd cli && cargo build --release"
-        echo "   cp target/release/rig $BIN_DIR/"
-    }
-elif command -v wget &>/dev/null; then
-    wget -q "$DOWNLOAD_URL" -O "$BIN_DIR/rig" 2>/dev/null || {
         echo "⚠️  Binary download failed. Build from source instead."
     }
 fi
@@ -55,15 +63,16 @@ if [ -f "$BIN_DIR/rig" ]; then
     echo "✅ rig binary installed to $BIN_DIR/rig"
 fi
 
-# ─── Install core docs ───
-echo "📄 Installing core docs..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ─── Install core docs, workflows, skills ───
+echo "📄 Installing core docs, workflows, and skills..."
 
-# If running from cloned repo, copy local files
 if [ -d "$SCRIPT_DIR/core" ]; then
     cp -r "$SCRIPT_DIR/core/"* "$ANTIGRAVITY_DIR/core/"
     cp -r "$SCRIPT_DIR/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
-    echo "✅ Core docs and workflows installed from local repo"
+    if [ -d "$SCRIPT_DIR/skills" ]; then
+        cp -r "$SCRIPT_DIR/skills/"* "$ANTIGRAVITY_DIR/skills/"
+    fi
+    echo "✅ Core docs, workflows, and skills installed from local repo"
 else
     # Download from GitHub
     echo "📥 Downloading from GitHub..."
@@ -71,8 +80,11 @@ else
     curl -fsSL "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" | tar xz -C "$TMPDIR"
     cp -r "$TMPDIR/rig-main/core/"* "$ANTIGRAVITY_DIR/core/"
     cp -r "$TMPDIR/rig-main/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
+    if [ -d "$TMPDIR/rig-main/skills" ]; then
+        cp -r "$TMPDIR/rig-main/skills/"* "$ANTIGRAVITY_DIR/skills/"
+    fi
     rm -rf "$TMPDIR"
-    echo "✅ Core docs and workflows downloaded"
+    echo "✅ Core docs, workflows, and skills downloaded"
 fi
 
 # ─── Install GEMINI.md ───
@@ -123,10 +135,11 @@ echo "📁 Installed to:"
 echo "   Binary:    $BIN_DIR/rig"
 echo "   Core:      $ANTIGRAVITY_DIR/core/"
 echo "   Workflows: $ANTIGRAVITY_DIR/workflows/"
+echo "   Skills:    $ANTIGRAVITY_DIR/skills/"
 echo "   GEMINI.md: $GEMINI_DIR/GEMINI.md"
 echo ""
 echo "🎮 Quick start:"
 echo "   In your project, type /init in AI chat"
-echo "   Or run: rig init"
+echo "   Or run: rig doctor"
 echo ""
 echo "📖 Help: /help or rig --help"

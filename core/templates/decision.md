@@ -1,24 +1,23 @@
-# Decision: DR-XXXX — [Title]
+# <Number> <Title>
 
-**Status:** [proposed | accepted | rejected | superseded]
-**Date:** [date]
-**Lane:** [normal | high-risk]
+Date: <YYYY-MM-DD>
+
+## Status
+Proposed | Accepted | Rejected | Superseded
 
 ## Context
-
-What situation led to this decision.
+Why does this decision need to be made? What is the current situation?
 
 ## Decision
-
-What was decided and why.
+What is the chosen approach and what rules/invariants are established?
 
 ## Alternatives Considered
-
-1. [Alternative A] — rejected because [reason]
-2. [Alternative B] — rejected because [reason]
+1. **Alternative 1**: Why rejected?
+2. **Alternative 2**: Why rejected?
 
 ## Consequences
+- Positive:
+- Tradeoffs / Constraints:
 
-- Positive: [what improves]
-- Negative: [what gets harder]
-- Risks: [what could go wrong]
+## Verification
+How is this decision verified or mechanically enforced?

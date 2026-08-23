@@ -1,21 +1,22 @@
-# 🔧 Rig — Harness-Core Workflow Framework v5.0
+# 🔧 Rig — Harness-Core Workflow Framework v5.1.0
 
-Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện.
+Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm.
 
-> **Triết lý:** Harness là core (quản lý QUY TRÌNH), Workflows là overlays (hướng dẫn CÁCH LÀM).
-> **Tham khảo:** Inspired by [Harness Engineering](https://openai.com/index/harness-engineering/) by OpenAI.
+> **Triết lý:** Harness là core (quản lý QUY TRÌNH & INVARIANTS), Workflows là overlays (hướng dẫn CÁCH LÀM), Skills là công cụ chuyên sâu.
+> **Tham khảo:** Inspired by [Harness Engineering](https://openai.com/index/harness-engineering/) & [repository-harness](https://github.com/hoangnb24/repository-harness).
 
-## ✨ Highlights
+## ✨ Highlights v5.1.0
 
 | Feature | Chi tiết |
 |---|---|
-| **Harness-Core** | Task loop trung tâm: Intake → Classify → Work → Validate → Trace |
-| **Rust CLI `rig`** | SQLite durable layer — query trạng thái thay vì parse files |
+| **Harness-Core Protocol v2** | 4 Work Shapes: Read-only, Bounded change, Durable planned change (`docs/plans/`), Invariant encoding |
+| **Invariant Encoding** | Mã hóa quy tắc kiến trúc/bảo mật thành native validation có kiểm chứng 2 chiều (Positive & Negative proof) |
+| **Rust CLI `rig`** | SQLite durable layer + `rig doctor` chẩn đoán toàn vẹn + `rig plan` quản lý kế hoạch |
+| **5 Agent Skills** | `$encode-invariant`, `$onboard-repository`, `$audit-onboarding-proposal`, `$improve-harness`, `$engineering-wisdom` |
 | **15 Workflow Overlays** | Mỗi file ≤5KB, chỉ chứa logic đặc thù (không copy-paste) |
-| **Risk Lanes** | 10 risk flags, 3 lanes (tiny/normal/high-risk), 5 hard gates |
+| **Risk Lanes & Hard Gates** | 10 risk flags, 3 lanes (tiny/normal/high-risk), 5 hard gates bắt buộc |
 | **Auto Trace & Score** | Mỗi task được ghi nhận và chấm điểm tự động |
-| **Growth Rule** | "Harness grows from friction" — tự cải thiện qua backlog |
-| **Graphify Integration** | Knowledge graph cho codebase (optional) |
+| **Evidence-backed Growth** | Cải tiến Harness dựa trên ma sát thực tế và kiểm chứng bằng fresh agent rerun |
 
 ---
 
@@ -33,18 +34,21 @@ curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | 
 iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.ps1) }"
 ```
 
-### Sau khi cài
+### Cấu trúc sau khi cài
 
 ```
 ~/.gemini/                           # Global (mọi dự án)
-├── GEMINI.md                        # Entry point (~20 dòng)
-├── rig_version                      # 5.0.0
+├── GEMINI.md                        # Entry point (~25 dòng)
+├── rig_version                      # 5.1.0
 └── antigravity/
-    ├── core/                        # Harness source of truth
+    ├── core/                        # Harness source of truth & rules
     │   ├── HARNESS.md               # Task loop & rules
+    │   ├── WORKFLOW.md              # 4 Work shapes & flows
     │   ├── FEATURE_INTAKE.md        # Risk classification
+    │   ├── patterns/                # Invariant encoding pattern
     │   ├── communication-style.md   # Shared comms rules
-    │   └── templates/               # Story, decision templates
+    │   └── templates/               # Exec-plan, runbook, decision, story templates
+    ├── skills/                      # 5 Specialized Agent Skills
     └── workflows/                   # 15 lightweight overlays
 
 your-project/                        # Per-project
@@ -52,38 +56,44 @@ your-project/                        # Per-project
 ├── .brain/brain.json                # Infra + GitHub config only
 └── docs/
     ├── product/                     # Product contract
+    ├── plans/                       # Durable plans (active/ & completed/)
+    ├── patterns/                    # Architecture & invariant patterns
     ├── stories/                     # Story packets
-    └── decisions/                   # Architecture decisions
+    └── decisions/                   # Architecture decisions (ADR)
 ```
 
 ---
 
-## 🎮 Commands
+## 🎮 Commands & Skills
 
 ### Planning & Design
 | Command | Chức năng |
 |---|---|
-| `/init` | Khởi tạo dự án + harness.db |
-| `/plan` | Lên kế hoạch + risk classification |
-| `/design` | Thiết kế kỹ thuật |
+| `/init` | Khởi tạo dự án + harness.db + plans structure |
+| `/plan` | Lên kế hoạch tính năng & Durable Plans |
+| `/design` | Thiết kế kỹ thuật (DB, API, Flow, ADR) |
 | `/visualize` | UI/UX mockup |
 | `/brainstorm` | Research & brainstorm |
 
-### Development
-| Command | Chức năng |
+### Development & Invariants
+| Command / Skill | Chức năng |
 |---|---|
 | `/code` | Viết code + auto-test loop |
 | `/debug` | Sửa lỗi + rollback |
 | `/refactor` | Tái cấu trúc + blast radius |
 | `/verify` | Chạy app + kiểm thử |
+| `$encode-invariant` | Mã hóa quy tắc kiến trúc & bảo mật thành native checks |
 
-### Operations
-| Command | Chức năng |
+### Operations & Maintenance
+| Command / Skill | Chức năng |
 |---|---|
-| `/health` | Review + audit toàn diện |
+| `/health` | Review + audit toàn diện + `rig doctor` |
 | `/deploy` | Deploy production |
 | `/status` | Tình trạng + bước tiếp theo |
 | `/save-brain` | Lưu kiến thức |
+| `$onboard-repository` | Khảo sát và lập bản đồ repository lạ (read-only first) |
+| `$improve-harness` | Cải tiến Harness dựa trên ma sát thực tế + fresh rerun |
+| `$engineering-wisdom` | Heuristic kỹ thuật thực tiễn (SOLID, Clean Architecture) |
 | `/help` | Hướng dẫn |
 | `/customize` | Tùy chỉnh preferences |
 
@@ -93,6 +103,10 @@ your-project/                        # Per-project
 
 ```bash
 rig init                                    # Khởi tạo harness.db
+rig doctor                                  # Kiểm tra tính toàn vẹn hệ thống
+rig plan create --title "..." --lane normal # Tạo durable plan mới
+rig plan list                               # Xem danh sách active plans
+rig plan complete --id "..."                # Hoàn thành plan
 rig intake --type spec-slice --summary "..." --lane normal
 rig story add --id US-001 --title "..." --lane normal
 rig story update --id US-001 --status done --unit 1
@@ -101,10 +115,7 @@ rig decision add --id DR-001 --title "..."
 rig trace --summary "..." --outcome success
 rig query stats                             # Project overview
 rig query matrix                            # Test coverage
-rig query session                           # Current state
-rig query backlog --open                    # Pending items
-rig query friction                          # Friction records
-rig backlog add --title "..." --pain "..."
+rig query backlog --open                    # Pending friction items
 ```
 
 ---
@@ -112,51 +123,21 @@ rig backlog add --title "..." --pain "..."
 ## 🏗️ Architecture
 
 ```
-┌────────────────────────────────────────────┐
-│  Layer 1: HARNESS CORE (Source of Truth)    │
-│  HARNESS.md → Task Loop (state machine)    │
-│  FEATURE_INTAKE.md → Risk Classification   │
-│  harness.db → Durable Layer (SQLite)       │
-├────────────────────────────────────────────┤
-│  Layer 2: WORKFLOW OVERLAYS (≤5KB each)    │
-│  15 lightweight guides for specific tasks  │
-├────────────────────────────────────────────┤
-│  Layer 3: TOOLS                            │
-│  rig CLI | Graphify | Git                  │
-└────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│  Layer 1: HARNESS CORE (Source of Truth & Controls)    │
+│  - HARNESS.md & WORKFLOW.md → Task loop & work shapes │
+│  - FEATURE_INTAKE.md → Risk classification             │
+│  - patterns/encoding-invariants.md → Guard framework   │
+│  - harness.db → SQLite Durable Layer                   │
+├────────────────────────────────────────────────────────┤
+│  Layer 2: WORKFLOW OVERLAYS & AGENT SKILLS             │
+│  - 15 lightweight overlays mapped to slash commands    │
+│  - 5 specialized agent skills ($skill)                 │
+├────────────────────────────────────────────────────────┤
+│  Layer 3: TOOLS                                        │
+│  - rig CLI | Graphify | Git                            │
+└────────────────────────────────────────────────────────┘
 ```
-
-### Risk Lanes
-
-| Lane | Khi nào | Yêu cầu |
-|---|---|---|
-| **Tiny** | Sửa nhỏ, ít rủi ro | Patch trực tiếp |
-| **Normal** | Story-sized, bounded | Story file + validation |
-| **High-risk** | Auth, data, security | Story folder (4 files) + human confirm |
-
----
-
-## 🔍 Graphify (Optional)
-
-```bash
-pip install graphifyy
-cd your-project && graphify update .
-```
-
-Auto-triggers in `/code`, `/debug`, `/refactor`, `/health`.
-
----
-
-## 📊 So sánh v4.3 → v5.0
-
-| Metric | v4.3 | v5.0 | Cải thiện |
-|---|---|---|---|
-| Instruction text | ~350KB | ~80KB | **-77%** |
-| Workflows | 27 files | 15 files | **-44%** |
-| State files | 9+ JSON | 2 JSON + SQLite | **-78%** |
-| Source of truth conflicts | 6+ | 0 | **-100%** |
-| Persona descriptions | 7 × 50 lines | 0 | **-100%** |
-| Non-tech mode copies | 7 × 40 lines | 1 × 50 lines | **-82%** |
 
 ---
 

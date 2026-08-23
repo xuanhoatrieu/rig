@@ -1,2 +1,7 @@
 # Rust build artifacts
 /cli/target/
+
+# Harness & local state
+harness.db
+graphify-out/
+.brain/

@@ -3,7 +3,11 @@ use clap::{Parser, Subcommand};
 mod db;
 
 #[derive(Parser)]
-#[command(name = "rig", version, about = "Harness-Core workflow framework CLI")]
+#[command(
+    name = "rig",
+    version,
+    about = "Harness-Core workflow framework CLI v5.1.0"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -14,6 +18,12 @@ enum Commands {
     /// Initialize harness.db in current project
     Init,
 
+    /// Run health check and diagnostic on repository harness
+    Doctor,
+
+    /// Show project harness status and statistics
+    Status,
+
     /// Record an intake classification
     Intake {
         #[arg(long)]
@@ -22,6 +32,12 @@ enum Commands {
         summary: String,
         #[arg(long)]
         lane: String,
+    },
+
+    /// Manage durable execution plans
+    Plan {
+        #[command(subcommand)]
+        action: PlanAction,
     },
 
     /// Manage stories
@@ -80,6 +96,29 @@ enum Commands {
 }
 
 #[derive(Subcommand)]
+enum PlanAction {
+    /// Create a new durable plan in docs/plans/active/
+    Create {
+        #[arg(long)]
+        title: String,
+        #[arg(long)]
+        lane: Option<String>,
+    },
+    /// List active (or all) plans
+    List {
+        #[arg(long)]
+        all: bool,
+    },
+    /// Complete an active plan and move it to docs/plans/completed/
+    Complete {
+        #[arg(long)]
+        id: String,
+        #[arg(long)]
+        outcome: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
 enum StoryAction {
     /// Add a new story
     Add {
@@ -110,9 +149,7 @@ enum StoryAction {
         verify: Option<String>,
     },
     /// Run story verification command
-    Verify {
-        id: String,
-    },
+    Verify { id: String },
 }
 
 #[derive(Subcommand)]
@@ -194,26 +231,69 @@ fn main() {
     let cli = Cli::parse();
     let result = match cli.command {
         Commands::Init => db::init_db(),
-        Commands::Intake { r#type, summary, lane } => {
-            db::record_intake(&r#type, &summary, &lane)
-        }
+        Commands::Doctor => db::doctor(),
+        Commands::Status => db::query_stats(),
+        Commands::Intake {
+            r#type,
+            summary,
+            lane,
+        } => db::record_intake(&r#type, &summary, &lane),
+        Commands::Plan { action } => match action {
+            PlanAction::Create { title, lane } => db::plan_create(&title, lane.as_deref()),
+            PlanAction::List { all } => db::plan_list(all),
+            PlanAction::Complete { id, outcome } => db::plan_complete(&id, outcome.as_deref()),
+        },
         Commands::Story { action } => match action {
-            StoryAction::Add { id, title, lane, verify } => {
-                db::story_add(&id, &title, &lane, verify.as_deref())
-            }
-            StoryAction::Update { id, status, unit, integration, e2e, platform, verify } => {
-                db::story_update(&id, status.as_deref(), unit, integration, e2e, platform, verify.as_deref())
-            }
+            StoryAction::Add {
+                id,
+                title,
+                lane,
+                verify,
+            } => db::story_add(&id, &title, &lane, verify.as_deref()),
+            StoryAction::Update {
+                id,
+                status,
+                unit,
+                integration,
+                e2e,
+                platform,
+                verify,
+            } => db::story_update(
+                &id,
+                status.as_deref(),
+                unit,
+                integration,
+                e2e,
+                platform,
+                verify.as_deref(),
+            ),
             StoryAction::Verify { id } => db::story_verify(&id),
         },
         Commands::Decision { action } => match action {
-            DecisionAction::Add { id, title, doc, notes } => {
-                db::decision_add(&id, &title, doc.as_deref(), notes.as_deref())
-            }
+            DecisionAction::Add {
+                id,
+                title,
+                doc,
+                notes,
+            } => db::decision_add(&id, &title, doc.as_deref(), notes.as_deref()),
         },
-        Commands::Trace { summary, outcome, story, files_changed, decisions, errors, harness_friction } => {
-            db::record_trace(&summary, &outcome, story.as_deref(), files_changed.as_deref(), decisions.as_deref(), errors.as_deref(), harness_friction.as_deref())
-        }
+        Commands::Trace {
+            summary,
+            outcome,
+            story,
+            files_changed,
+            decisions,
+            errors,
+            harness_friction,
+        } => db::record_trace(
+            &summary,
+            &outcome,
+            story.as_deref(),
+            files_changed.as_deref(),
+            decisions.as_deref(),
+            errors.as_deref(),
+            harness_friction.as_deref(),
+        ),
         Commands::ScoreTrace { id } => db::score_trace(id),
         Commands::Query { target } => match target {
             QueryTarget::Matrix { numeric } => db::query_matrix(numeric),
@@ -227,9 +307,12 @@ fn main() {
             SessionAction::Set { key, value } => db::session_set(&key, &value),
         },
         Commands::Backlog { action } => match action {
-            BacklogAction::Add { title, pain, risk, predicted } => {
-                db::backlog_add(&title, &pain, risk.as_deref(), predicted.as_deref())
-            }
+            BacklogAction::Add {
+                title,
+                pain,
+                risk,
+                predicted,
+            } => db::backlog_add(&title, &pain, risk.as_deref(), predicted.as_deref()),
             BacklogAction::Close { id, outcome } => db::backlog_close(id, &outcome),
         },
     };

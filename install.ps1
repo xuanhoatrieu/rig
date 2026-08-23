@@ -1,8 +1,8 @@
-# Rig v5.0 Installer — Windows PowerShell
+# Rig v5.1.0 Installer — Windows PowerShell
 # Usage: iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.ps1) }"
 
 $ErrorActionPreference = "Stop"
-$Version = "5.0.0"
+$Version = "5.1.0"
 $Repo = "xuanhoatrieu/rig"
 $GeminiDir = "$env:USERPROFILE\.gemini"
 $AntigravityDir = "$GeminiDir\antigravity"
@@ -12,7 +12,9 @@ Write-Host "🚀 Installing Rig v$Version..." -ForegroundColor Cyan
 
 # ─── Create directories ───
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\templates\high-risk-story" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\patterns" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\workflows" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AntigravityDir\skills" | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
 # ─── Download rig binary ───
@@ -29,7 +31,7 @@ try {
 }
 
 # ─── Download and extract repo ───
-Write-Host "📄 Downloading core docs and workflows..."
+Write-Host "📄 Downloading core docs, workflows, and skills..."
 $TmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
 $ZipUrl = "https://github.com/$Repo/archive/refs/heads/main.zip"
 
@@ -40,10 +42,13 @@ try {
 
     Copy-Item -Recurse -Force "$TmpDir\rig-main\core\*" "$AntigravityDir\core\"
     Copy-Item -Recurse -Force "$TmpDir\rig-main\workflows\*" "$AntigravityDir\workflows\"
+    if (Test-Path "$TmpDir\rig-main\skills") {
+        Copy-Item -Recurse -Force "$TmpDir\rig-main\skills\*" "$AntigravityDir\skills\"
+    }
     Copy-Item -Force "$TmpDir\rig-main\gemini.md" "$GeminiDir\GEMINI.md"
 
     Remove-Item -Recurse -Force $TmpDir
-    Write-Host "✅ Core docs and workflows installed" -ForegroundColor Green
+    Write-Host "✅ Core docs, workflows, and skills installed" -ForegroundColor Green
 } catch {
     Write-Host "❌ Download failed: $_" -ForegroundColor Red
     exit 1
@@ -68,5 +73,6 @@ Write-Host ""
 Write-Host "📁 Binary:    $BinDir\rig.exe"
 Write-Host "   Core:      $AntigravityDir\core\"
 Write-Host "   Workflows: $AntigravityDir\workflows\"
+Write-Host "   Skills:    $AntigravityDir\skills\"
 Write-Host ""
 Write-Host "🎮 Quick start: type /init in AI chat"
