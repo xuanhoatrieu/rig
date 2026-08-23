@@ -72,8 +72,9 @@ Set-Content -Path "$GeminiDir\rig_version" -Value $Version
 $CurrentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
 if ($CurrentPath -notlike "*$BinDir*") {
     [Environment]::SetEnvironmentVariable("PATH", "$BinDir;$CurrentPath", "User")
-    Write-Host "📌 Added $BinDir to PATH" -ForegroundColor Green
+    Write-Host "📌 Added $BinDir to permanent User PATH" -ForegroundColor Green
 }
+$env:PATH = "$BinDir;$env:PATH"
 
 # ─── Summary ───
 Write-Host ""
