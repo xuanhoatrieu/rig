@@ -81,18 +81,57 @@ else
     fi
 
     # Download pre-built release binary or compile with cargo
+    INSTALLED_BIN=false
     if command -v curl &>/dev/null && curl -fsSL "$DOWNLOAD_URL" -o "$BIN_DIR/rig" 2>/dev/null; then
         chmod +x "$BIN_DIR/rig"
+        INSTALLED_BIN=true
         echo "✅ Pre-built rig binary downloaded to $BIN_DIR/rig"
     elif command -v cargo &>/dev/null; then
         echo "🔨 Building rig binary from source using cargo..."
         cargo build --release --manifest-path "$TMPDIR/rig-main/cli/Cargo.toml"
         cp "$TMPDIR/rig-main/cli/target/release/rig" "$BIN_DIR/rig"
         chmod +x "$BIN_DIR/rig"
+        INSTALLED_BIN=true
         echo "✅ rig binary compiled and installed to $BIN_DIR/rig"
-    else
-        echo "⚠️  Could not download pre-built binary and cargo is not installed."
-        echo "   Please install cargo (https://rustup.rs) to compile rig CLI."
+    fi
+
+    # Fallback bash wrapper
+    if [ "$INSTALLED_BIN" = false ] && [ ! -f "$BIN_DIR/rig" ]; then
+        echo "📦 Creating fallback rig bash CLI wrapper..."
+        cat << 'EOF' > "$BIN_DIR/rig"
+#!/usr/bin/env bash
+VERSION="5.1.0"
+case "${1:-help}" in
+    update)
+        curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash
+        ;;
+    version|--version)
+        echo "rig v${VERSION}"
+        ;;
+    init)
+        mkdir -p docs/product docs/decisions docs/plans/active docs/plans/completed docs/patterns
+        echo "✅ Initialized Rig project structure!"
+        ;;
+    doctor)
+        echo "🩺 Rig Harness Doctor — Integrity Check"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        [ -d docs/product ] && echo "✅ [Docs] docs/product exists" || echo "⚠️  docs/product missing"
+        [ -d docs/decisions ] && echo "✅ [Docs] docs/decisions exists" || echo "⚠️  docs/decisions missing"
+        [ -d docs/plans ] && echo "✅ [Docs] docs/plans exists" || echo "⚠️  docs/plans missing"
+        [ -f .brain/brain.json ] && echo "✅ [Brain] .brain/brain.json exists" || echo "⚠️  .brain/brain.json missing"
+        echo "🎉 System check completed!"
+        ;;
+    *)
+        echo "Rig v${VERSION} CLI"
+        echo "Usage: rig <command>"
+        echo "  rig update   - Update Rig"
+        echo "  rig doctor   - Health check"
+        echo "  rig init     - Init project"
+        ;;
+esac
+EOF
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ rig CLI command wrapper ready in $BIN_DIR"
     fi
 
     rm -rf "$TMPDIR"
