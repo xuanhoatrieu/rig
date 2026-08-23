@@ -15,10 +15,11 @@ New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\templates\high-r
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\patterns" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\workflows" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\skills" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AntigravityDir\plugins" | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
 # ─── Download and extract repo ───
-Write-Host "📄 Downloading core docs, workflows, and skills..."
+Write-Host "📄 Downloading core docs, workflows, skills, and plugins..."
 $TmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
 $ZipUrl = "https://github.com/$Repo/archive/refs/heads/main.zip"
 
@@ -31,6 +32,9 @@ try {
     Copy-Item -Recurse -Force "$TmpDir\rig-main\workflows\*" "$AntigravityDir\workflows\"
     if (Test-Path "$TmpDir\rig-main\skills") {
         Copy-Item -Recurse -Force "$TmpDir\rig-main\skills\*" "$AntigravityDir\skills\"
+    }
+    if (Test-Path "$TmpDir\rig-main\plugins") {
+        Copy-Item -Recurse -Force "$TmpDir\rig-main\plugins\*" "$AntigravityDir\plugins\"
     }
     Copy-Item -Force "$TmpDir\rig-main\gemini.md" "$GeminiDir\GEMINI.md"
 
@@ -55,7 +59,7 @@ try {
     }
 
     Remove-Item -Recurse -Force $TmpDir
-    Write-Host "✅ Core docs, workflows, and skills installed" -ForegroundColor Green
+    Write-Host "✅ Core docs, workflows, skills, and plugins installed" -ForegroundColor Green
 } catch {
     Write-Host "❌ Installation failed: $_" -ForegroundColor Red
     exit 1
@@ -81,6 +85,7 @@ Write-Host "📁 Binary:    $BinDir\rig.exe"
 Write-Host "   Core:      $AntigravityDir\core\"
 Write-Host "   Workflows: $AntigravityDir\workflows\"
 Write-Host "   Skills:    $AntigravityDir\skills\"
+Write-Host "   Plugins:   $AntigravityDir\plugins\"
 Write-Host ""
 Write-Host "🎮 Quick start: type /init in AI chat"
 Write-Host "   To update later, run: rig update"

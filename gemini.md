@@ -15,12 +15,20 @@ Mọi request (cả ngôn ngữ tự nhiên, / commands, lẫn $ skills) đều 
 - User gõ `$skill` → Agent kích hoạt ĐÚNG skill được chỉ định
 
 Available workflows:
+Core (15):
 /init, /plan, /design, /visualize, /brainstorm
 /code, /debug, /refactor, /verify, /health
 /deploy, /status, /save-brain, /help, /customize
 
+Education Plugin (5):
+/textbook, /pptx, /question, /video, /export
+
 Available skills:
+Harness Core:
 $encode-invariant, $onboard-repository, $audit-onboarding-proposal, $improve-harness, $engineering-wisdom
+
+Education & Content:
+$create-ebook, $export-ebook, $create-question, $create-pptx, $create-video
 
 ## Persistent Data
 .brain/brain.json: infrastructure + github → KHÔNG BAO GIỜ XÓA

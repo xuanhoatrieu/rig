@@ -36,10 +36,11 @@ mkdir -p "$ANTIGRAVITY_DIR/core/templates/high-risk-story"
 mkdir -p "$ANTIGRAVITY_DIR/core/patterns"
 mkdir -p "$ANTIGRAVITY_DIR/workflows"
 mkdir -p "$ANTIGRAVITY_DIR/skills"
+mkdir -p "$ANTIGRAVITY_DIR/plugins"
 mkdir -p "$BIN_DIR"
 
 # ─── Install core docs, workflows, skills & binary ───
-echo "📄 Installing core docs, workflows, and skills..."
+echo "📄 Installing core docs, workflows, skills, and plugins..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -d "$SCRIPT_DIR/core" ]; then
@@ -48,6 +49,9 @@ if [ -d "$SCRIPT_DIR/core" ]; then
     cp -r "$SCRIPT_DIR/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
     if [ -d "$SCRIPT_DIR/skills" ]; then
         cp -r "$SCRIPT_DIR/skills/"* "$ANTIGRAVITY_DIR/skills/"
+    fi
+    if [ -d "$SCRIPT_DIR/plugins" ]; then
+        cp -r "$SCRIPT_DIR/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
 
     if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
@@ -61,7 +65,7 @@ if [ -d "$SCRIPT_DIR/core" ]; then
         chmod +x "$BIN_DIR/rig"
         echo "✅ rig binary built and installed to $BIN_DIR/rig"
     fi
-    echo "✅ Core docs, workflows, and skills installed from local repo"
+    echo "✅ Core docs, workflows, skills, and plugins installed from local repo"
 else
     # Remote download from GitHub
     echo "📥 Downloading from GitHub..."
@@ -71,6 +75,9 @@ else
     cp -r "$TMPDIR/rig-main/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
     if [ -d "$TMPDIR/rig-main/skills" ]; then
         cp -r "$TMPDIR/rig-main/skills/"* "$ANTIGRAVITY_DIR/skills/"
+    fi
+    if [ -d "$TMPDIR/rig-main/plugins" ]; then
+        cp -r "$TMPDIR/rig-main/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
 
     # Download pre-built release binary or compile with cargo
@@ -89,7 +96,7 @@ else
     fi
 
     rm -rf "$TMPDIR"
-    echo "✅ Core docs, workflows, and skills downloaded"
+    echo "✅ Core docs, workflows, skills, and plugins downloaded"
 fi
 
 if [ -f "$BIN_DIR/rig" ]; then
@@ -145,6 +152,7 @@ echo "   Binary:    $BIN_DIR/rig"
 echo "   Core:      $ANTIGRAVITY_DIR/core/"
 echo "   Workflows: $ANTIGRAVITY_DIR/workflows/"
 echo "   Skills:    $ANTIGRAVITY_DIR/skills/"
+echo "   Plugins:   $ANTIGRAVITY_DIR/plugins/"
 echo "   GEMINI.md: $GEMINI_DIR/GEMINI.md"
 echo ""
 echo "🎮 Quick start:"
