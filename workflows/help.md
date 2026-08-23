@@ -27,6 +27,7 @@ description: ❓ Trợ giúp & Hướng dẫn Rig v5.1.0
 | Command | Chức năng |
 |---|---|
 | `/health` | Review & audit toàn diện + `rig doctor` |
+| `/update` | Cập nhật Rig Framework & CLI lên bản mới nhất |
 | `/deploy` | Deploy production |
 | `/status` | Xem tình trạng + bước tiếp theo |
 | `/save-brain` | Lưu kiến thức |
