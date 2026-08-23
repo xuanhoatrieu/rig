@@ -38,43 +38,32 @@ mkdir -p "$ANTIGRAVITY_DIR/workflows"
 mkdir -p "$ANTIGRAVITY_DIR/skills"
 mkdir -p "$BIN_DIR"
 
-# ─── Download or build rig binary ───
-echo "📦 Installing rig binary..."
+# ─── Install core docs, workflows, skills & binary ───
+echo "📄 Installing core docs, workflows, and skills..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
-    cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
-    chmod +x "$BIN_DIR/rig"
-    echo "✅ rig binary installed from local release build"
-elif [ -d "$SCRIPT_DIR/cli" ] && command -v cargo &>/dev/null; then
-    echo "🔨 Building rig from source with cargo..."
-    cargo build --release --manifest-path "$SCRIPT_DIR/cli/Cargo.toml"
-    cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
-    chmod +x "$BIN_DIR/rig"
-    echo "✅ rig binary built and installed to $BIN_DIR/rig"
-elif command -v curl &>/dev/null; then
-    curl -fsSL "$DOWNLOAD_URL" -o "$BIN_DIR/rig" 2>/dev/null || {
-        echo "⚠️  Binary download failed. Build from source instead."
-    }
-fi
-
-if [ -f "$BIN_DIR/rig" ]; then
-    chmod +x "$BIN_DIR/rig"
-    echo "✅ rig binary installed to $BIN_DIR/rig"
-fi
-
-# ─── Install core docs, workflows, skills ───
-echo "📄 Installing core docs, workflows, and skills..."
-
 if [ -d "$SCRIPT_DIR/core" ]; then
+    # Local installation
     cp -r "$SCRIPT_DIR/core/"* "$ANTIGRAVITY_DIR/core/"
     cp -r "$SCRIPT_DIR/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
     if [ -d "$SCRIPT_DIR/skills" ]; then
         cp -r "$SCRIPT_DIR/skills/"* "$ANTIGRAVITY_DIR/skills/"
     fi
+
+    if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
+        cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ rig binary installed from local release build"
+    elif [ -d "$SCRIPT_DIR/cli" ] && command -v cargo &>/dev/null; then
+        echo "🔨 Building rig from source with cargo..."
+        cargo build --release --manifest-path "$SCRIPT_DIR/cli/Cargo.toml"
+        cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ rig binary built and installed to $BIN_DIR/rig"
+    fi
     echo "✅ Core docs, workflows, and skills installed from local repo"
 else
-    # Download from GitHub
+    # Remote download from GitHub
     echo "📥 Downloading from GitHub..."
     TMPDIR=$(mktemp -d)
     curl -fsSL "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" | tar xz -C "$TMPDIR"
@@ -83,8 +72,28 @@ else
     if [ -d "$TMPDIR/rig-main/skills" ]; then
         cp -r "$TMPDIR/rig-main/skills/"* "$ANTIGRAVITY_DIR/skills/"
     fi
+
+    # Download pre-built release binary or compile with cargo
+    if command -v curl &>/dev/null && curl -fsSL "$DOWNLOAD_URL" -o "$BIN_DIR/rig" 2>/dev/null; then
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ Pre-built rig binary downloaded to $BIN_DIR/rig"
+    elif command -v cargo &>/dev/null; then
+        echo "🔨 Building rig binary from source using cargo..."
+        cargo build --release --manifest-path "$TMPDIR/rig-main/cli/Cargo.toml"
+        cp "$TMPDIR/rig-main/cli/target/release/rig" "$BIN_DIR/rig"
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ rig binary compiled and installed to $BIN_DIR/rig"
+    else
+        echo "⚠️  Could not download pre-built binary and cargo is not installed."
+        echo "   Please install cargo (https://rustup.rs) to compile rig CLI."
+    fi
+
     rm -rf "$TMPDIR"
     echo "✅ Core docs, workflows, and skills downloaded"
+fi
+
+if [ -f "$BIN_DIR/rig" ]; then
+    chmod +x "$BIN_DIR/rig"
 fi
 
 # ─── Install GEMINI.md ───
@@ -141,5 +150,6 @@ echo ""
 echo "🎮 Quick start:"
 echo "   In your project, type /init in AI chat"
 echo "   Or run: rig doctor"
+echo "   To update later, run: rig update"
 echo ""
 echo "📖 Help: /help or rig --help"

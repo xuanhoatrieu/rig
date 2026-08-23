@@ -47,6 +47,7 @@ description: ❓ Trợ giúp & Hướng dẫn Rig v5.1.0
 ```bash
 rig init                                          # Khởi tạo database
 rig doctor                                        # Kiểm tra tính toàn vẹn
+rig update                                        # Cập nhật Rig lên phiên bản mới nhất
 rig plan create/list/complete                     # Quản lý durable plans
 rig intake --type ... --summary ... --lane ...   # Phân loại task
 rig story add/update/verify                       # Quản lý stories

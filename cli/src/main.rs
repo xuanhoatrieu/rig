@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod db;
+mod update;
 
 #[derive(Parser)]
 #[command(
@@ -20,6 +21,12 @@ enum Commands {
 
     /// Run health check and diagnostic on repository harness
     Doctor,
+
+    /// Update Rig framework and CLI to the latest version
+    Update {
+        #[arg(long)]
+        dry_run: bool,
+    },
 
     /// Show project harness status and statistics
     Status,
@@ -232,6 +239,7 @@ fn main() {
     let result = match cli.command {
         Commands::Init => db::init_db(),
         Commands::Doctor => db::doctor(),
+        Commands::Update { dry_run } => update::update_rig(dry_run),
         Commands::Status => db::query_stats(),
         Commands::Intake {
             r#type,

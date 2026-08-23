@@ -187,6 +187,7 @@ CREATE TABLE IF NOT EXISTS knowledge (
 |---|---|---|
 | `rig init` | Create SQLite schema in the working directory | None |
 | `rig doctor` | Health check on database, file structure, and Git ignore | None |
+| `rig update` | Self-update Rig framework and CLI to latest release | `[--dry-run]` |
 | `rig status` | High level project stats overview | None |
 | `rig plan create` | Create a durable plan in `docs/plans/active/` | `--title <TITLE> [--lane <LANE>]` |
 | `rig plan list` | List active (or all) execution plans | `[--all]` |

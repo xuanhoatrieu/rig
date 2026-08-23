@@ -17,19 +17,6 @@ New-Item -ItemType Directory -Force -Path "$AntigravityDir\workflows" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\skills" | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
-# ─── Download rig binary ───
-$BinaryName = "rig-windows-x86_64.exe"
-$DownloadUrl = "https://github.com/$Repo/releases/download/v$Version/$BinaryName"
-
-Write-Host "📦 Downloading rig binary..."
-try {
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile "$BinDir\rig.exe" -UseBasicParsing
-    Write-Host "✅ rig.exe installed to $BinDir\rig.exe" -ForegroundColor Green
-} catch {
-    Write-Host "⚠️  Binary download failed. Build from source:" -ForegroundColor Yellow
-    Write-Host "   cd cli; cargo build --release" -ForegroundColor Yellow
-}
-
 # ─── Download and extract repo ───
 Write-Host "📄 Downloading core docs, workflows, and skills..."
 $TmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
@@ -47,10 +34,30 @@ try {
     }
     Copy-Item -Force "$TmpDir\rig-main\gemini.md" "$GeminiDir\GEMINI.md"
 
+    # Download pre-built binary or compile with cargo
+    $BinaryName = "rig-windows-x86_64.exe"
+    $DownloadUrl = "https://github.com/$Repo/releases/download/v$Version/$BinaryName"
+
+    $Downloaded = $false
+    try {
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile "$BinDir\rig.exe" -UseBasicParsing
+        $Downloaded = $true
+        Write-Host "✅ rig.exe downloaded to $BinDir\rig.exe" -ForegroundColor Green
+    } catch {
+        Write-Host "⚠️  Pre-built binary download failed." -ForegroundColor Yellow
+    }
+
+    if (-not $Downloaded -and (Get-Command cargo -ErrorAction SilentlyContinue)) {
+        Write-Host "🔨 Compiling rig CLI from source with cargo..." -ForegroundColor Cyan
+        cargo build --release --manifest-path "$TmpDir\rig-main\cli\Cargo.toml"
+        Copy-Item "$TmpDir\rig-main\cli\target\release\rig.exe" "$BinDir\rig.exe"
+        Write-Host "✅ rig.exe compiled and installed to $BinDir\rig.exe" -ForegroundColor Green
+    }
+
     Remove-Item -Recurse -Force $TmpDir
     Write-Host "✅ Core docs, workflows, and skills installed" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Download failed: $_" -ForegroundColor Red
+    Write-Host "❌ Installation failed: $_" -ForegroundColor Red
     exit 1
 }
 
@@ -76,3 +83,4 @@ Write-Host "   Workflows: $AntigravityDir\workflows\"
 Write-Host "   Skills:    $AntigravityDir\skills\"
 Write-Host ""
 Write-Host "🎮 Quick start: type /init in AI chat"
+Write-Host "   To update later, run: rig update"

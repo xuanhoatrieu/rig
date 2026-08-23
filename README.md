@@ -104,6 +104,7 @@ your-project/                        # Per-project
 ```bash
 rig init                                    # Khởi tạo harness.db
 rig doctor                                  # Kiểm tra tính toàn vẹn hệ thống
+rig update                                  # Tự động cập nhật Rig lên bản mới nhất
 rig plan create --title "..." --lane normal # Tạo durable plan mới
 rig plan list                               # Xem danh sách active plans
 rig plan complete --id "..."                # Hoàn thành plan
