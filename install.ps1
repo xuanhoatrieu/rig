@@ -6,6 +6,8 @@ $Version = "5.2.0"
 $Repo = "xuanhoatrieu/rig"
 $GeminiDir = "$env:USERPROFILE\.gemini"
 $AntigravityDir = "$GeminiDir\antigravity"
+$CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { "$env:USERPROFILE\.codex" }
+$CodexSkillsDir = "$env:USERPROFILE\.agents\skills"
 $BinDir = "$env:USERPROFILE\.local\bin"
 
 Write-Host "🚀 Installing Rig v$Version..." -ForegroundColor Cyan
@@ -16,6 +18,8 @@ New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\patterns" | Out-
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\workflows" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\skills" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\plugins" | Out-Null
+New-Item -ItemType Directory -Force -Path $CodexHome | Out-Null
+New-Item -ItemType Directory -Force -Path $CodexSkillsDir | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
 # ─── Download and extract repo ───
@@ -37,6 +41,31 @@ try {
         Copy-Item -Recurse -Force "$TmpDir\rig-main\plugins\*" "$AntigravityDir\plugins\"
     }
     Copy-Item -Force "$TmpDir\rig-main\gemini.md" "$GeminiDir\GEMINI.md"
+
+    # Install Codex skills and merge only the managed Rig guidance block.
+    Write-Host "🤖 Installing Codex adapter..." -ForegroundColor Cyan
+    Get-ChildItem "$TmpDir\rig-main\skills" -Directory | ForEach-Object {
+        $TargetSkill = Join-Path $CodexSkillsDir $_.Name
+        New-Item -ItemType Directory -Force -Path $TargetSkill | Out-Null
+        Copy-Item -Recurse -Force "$($_.FullName)\*" "$TargetSkill\"
+    }
+
+    $ManagedBlock = (Get-Content -Raw "$TmpDir\rig-main\codex\AGENTS.md").Trim()
+    $CodexAgentsPath = Join-Path $CodexHome "AGENTS.md"
+    $ManagedPattern = '(?s)<!-- RIG_CODEX:BEGIN -->.*?<!-- RIG_CODEX:END -->'
+    if (Test-Path $CodexAgentsPath) {
+        $ExistingAgents = Get-Content -Raw $CodexAgentsPath
+        if ($ExistingAgents -match $ManagedPattern) {
+            $UpdatedAgents = [regex]::Replace($ExistingAgents, $ManagedPattern, $ManagedBlock)
+        } else {
+            $UpdatedAgents = $ExistingAgents.TrimEnd() + "`r`n`r`n" + $ManagedBlock + "`r`n"
+        }
+    } else {
+        $UpdatedAgents = $ManagedBlock + "`r`n"
+    }
+    Set-Content -Path $CodexAgentsPath -Value $UpdatedAgents -Encoding utf8
+    Set-Content -Path (Join-Path $CodexHome "rig_version") -Value $Version
+    Write-Host "✅ Codex skills installed to $CodexSkillsDir" -ForegroundColor Green
 
     # Download pre-built binary or compile with cargo
     $BinaryName = "rig-windows-x86_64.exe"
@@ -171,6 +200,9 @@ Write-Host "📁 Core:      $AntigravityDir\core\"
 Write-Host "   Workflows: $AntigravityDir\workflows\"
 Write-Host "   Skills:    $AntigravityDir\skills\"
 Write-Host "   Plugins:   $AntigravityDir\plugins\"
+Write-Host "   Codex:     $CodexSkillsDir\"
+Write-Host "   AGENTS.md: $CodexHome\AGENTS.md"
 Write-Host ""
-Write-Host "🎮 Quick start: type /init in AI chat"
+Write-Host "🎮 Antigravity: type /init in AI chat"
+Write-Host "   Codex: start a new task and invoke `$rig-harness"
 Write-Host "   To update later, run: rig update"

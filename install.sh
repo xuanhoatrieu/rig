@@ -8,6 +8,8 @@ VERSION="5.2.0"
 REPO="xuanhoatrieu/rig"
 GEMINI_DIR="$HOME/.gemini"
 ANTIGRAVITY_DIR="$GEMINI_DIR/antigravity"
+RIG_CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+CODEX_SKILLS_DIR="$HOME/.agents/skills"
 BIN_DIR="$HOME/.local/bin"
 
 echo "🚀 Installing Rig v${VERSION}..."
@@ -37,7 +39,39 @@ mkdir -p "$ANTIGRAVITY_DIR/core/patterns"
 mkdir -p "$ANTIGRAVITY_DIR/workflows"
 mkdir -p "$ANTIGRAVITY_DIR/skills"
 mkdir -p "$ANTIGRAVITY_DIR/plugins"
+mkdir -p "$RIG_CODEX_HOME"
+mkdir -p "$CODEX_SKILLS_DIR"
 mkdir -p "$BIN_DIR"
+
+install_codex_adapter() {
+    local source_root="$1"
+    local agents_path="$RIG_CODEX_HOME/AGENTS.md"
+    local managed_block="$source_root/codex/AGENTS.md"
+    local merged_agents
+
+    echo "🤖 Installing Codex adapter..."
+    cp -r "$source_root/skills/." "$CODEX_SKILLS_DIR/"
+
+    if [ -f "$agents_path" ]; then
+        merged_agents="$(mktemp)"
+        awk '
+            /<!-- RIG_CODEX:BEGIN -->/ { skip=1; next }
+            /<!-- RIG_CODEX:END -->/ { skip=0; next }
+            !skip { print }
+        ' "$agents_path" > "$merged_agents"
+        if [ -s "$merged_agents" ]; then
+            printf '\n\n' >> "$merged_agents"
+        fi
+        cat "$managed_block" >> "$merged_agents"
+        printf '\n' >> "$merged_agents"
+        mv "$merged_agents" "$agents_path"
+    else
+        cp "$managed_block" "$agents_path"
+    fi
+
+    echo "$VERSION" > "$RIG_CODEX_HOME/rig_version"
+    echo "✅ Codex skills installed to $CODEX_SKILLS_DIR"
+}
 
 # ─── Install core docs, workflows, skills & binary ───
 echo "📄 Installing core docs, workflows, skills, and plugins..."
@@ -53,6 +87,7 @@ if [ -d "$SCRIPT_DIR/core" ]; then
     if [ -d "$SCRIPT_DIR/plugins" ]; then
         cp -r "$SCRIPT_DIR/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
+    install_codex_adapter "$SCRIPT_DIR"
 
     if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
         cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
@@ -79,6 +114,7 @@ else
     if [ -d "$TMPDIR/rig-main/plugins" ]; then
         cp -r "$TMPDIR/rig-main/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
+    install_codex_adapter "$TMPDIR/rig-main"
 
     # Download pre-built release binary or compile with cargo
     INSTALLED_BIN=false
@@ -193,9 +229,12 @@ echo "   Workflows: $ANTIGRAVITY_DIR/workflows/"
 echo "   Skills:    $ANTIGRAVITY_DIR/skills/"
 echo "   Plugins:   $ANTIGRAVITY_DIR/plugins/"
 echo "   GEMINI.md: $GEMINI_DIR/GEMINI.md"
+echo "   Codex:     $CODEX_SKILLS_DIR/"
+echo "   AGENTS.md: $RIG_CODEX_HOME/AGENTS.md"
 echo ""
 echo "🎮 Quick start:"
-echo "   In your project, type /init in AI chat"
+echo "   Antigravity: type /init in AI chat"
+echo '   Codex: start a new task and invoke $rig-harness'
 echo "   Or run: rig doctor"
 echo "   To update later, run: rig update"
 echo ""

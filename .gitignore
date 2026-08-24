@@ -5,3 +5,7 @@
 harness.db
 graphify-out/
 .brain/
+
+# Python caches
+__pycache__/
+*.py[cod]

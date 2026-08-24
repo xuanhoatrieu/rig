@@ -1,0 +1,36 @@
+{
+  "name": "rig",
+  "version": "5.2.0",
+  "description": "Harness-core workflows, durable planning, validation, and evidence-backed repository skills for Codex.",
+  "author": {
+    "name": "xuanhoatrieu",
+    "url": "https://github.com/xuanhoatrieu"
+  },
+  "homepage": "https://github.com/xuanhoatrieu/rig",
+  "repository": "https://github.com/xuanhoatrieu/rig",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "harness",
+    "workflow",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Rig",
+    "shortDescription": "Repository harness and workflow skills",
+    "longDescription": "Rig routes repository work through risk-aware workflows, durable plans, validation evidence, and reusable engineering skills.",
+    "developerName": "xuanhoatrieu",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Repository workflows",
+      "Durable planning",
+      "Validation"
+    ],
+    "defaultPrompt": [
+      "Use $rig-harness to handle this repository task.",
+      "Use $onboard-repository to map this codebase.",
+      "Use $encode-invariant to enforce this accepted rule."
+    ]
+  }
+}

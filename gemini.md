@@ -26,7 +26,7 @@ Education Plugin (5):
 
 Available skills:
 Harness Core:
-$encode-invariant, $onboard-repository, $audit-onboarding-proposal, $improve-harness, $engineering-wisdom
+$rig-harness, $encode-invariant, $onboard-repository, $audit-onboarding-proposal, $improve-harness, $engineering-wisdom
 
 Education & Content:
 $create-ebook, $export-ebook, $create-question, $create-pptx, $create-video

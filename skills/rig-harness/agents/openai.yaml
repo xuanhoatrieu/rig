@@ -1,0 +1,6 @@
+interface:
+  display_name: "Rig Harness"
+  short_description: "Route work through the Rig harness loop"
+  default_prompt: "Use $rig-harness to classify and execute this repository task with the appropriate Rig workflow."
+policy:
+  allow_implicit_invocation: true

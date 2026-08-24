@@ -1,6 +1,6 @@
 # 🔧 Rig — Harness-Core Workflow Framework v5.2.0
 
-Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm.
+Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm. Cùng một repository hỗ trợ cả **OpenAI Codex** và **Gemini Antigravity**.
 
 > **Triết lý:** Harness là core (quản lý QUY TRÌNH & INVARIANTS), Workflows là overlays (hướng dẫn CÁCH LÀM), Skills là công cụ chuyên sâu.
 > **Tham khảo:** Inspired by [Harness Engineering](https://openai.com/index/harness-engineering/) & [repository-harness](https://github.com/hoangnb24/repository-harness).
@@ -12,7 +12,8 @@ Rig biến AI coding agent thành đồng nghiệp có quy trình — biết ph�
 | **Harness-Core Protocol v2** | 4 Work Shapes: Read-only, Bounded change, Durable planned change (`docs/plans/`), Invariant encoding |
 | **Invariant Encoding** | Mã hóa quy tắc kiến trúc/bảo mật thành native validation có kiểm chứng 2 chiều (Positive & Negative proof) |
 | **Rust CLI `rig`** | SQLite durable layer + `rig doctor` chẩn đoán toàn vẹn + `rig plan` quản lý kế hoạch |
-| **5 Agent Skills** | `$encode-invariant`, `$onboard-repository`, `$audit-onboarding-proposal`, `$improve-harness`, `$engineering-wisdom` |
+| **Codex + Antigravity** | Codex plugin/skills/`AGENTS.md` và Gemini `GEMINI.md` dùng chung Harness Core |
+| **6 Harness Skills** | `$rig-harness`, `$encode-invariant`, `$onboard-repository`, `$audit-onboarding-proposal`, `$improve-harness`, `$engineering-wisdom` |
 | **15 Workflow Overlays** | Mỗi file ≤5KB, chỉ chứa logic đặc thù (không copy-paste) |
 | **Risk Lanes & Hard Gates** | 10 risk flags, 3 lanes (tiny/normal/high-risk), 5 hard gates bắt buộc |
 | **Auto Trace & Score** | Mỗi task được ghi nhận và chấm điểm tự động |
@@ -33,6 +34,8 @@ curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | 
 ```powershell
 iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.ps1) }"
 ```
+
+Một lần cài cấu hình cả Codex và Antigravity. Xem hướng dẫn Codex chi tiết tại [docs/CODEX.md](docs/CODEX.md).
 
 ### Cấu trúc sau khi cài
 
@@ -60,6 +63,13 @@ your-project/                        # Per-project
     ├── patterns/                    # Architecture & invariant patterns
     ├── stories/                     # Story packets
     └── decisions/                   # Architecture decisions (ADR)
+
+~/.agents/skills/                    # Codex personal skills
+├── rig-harness/                     # Router cho Harness Core + workflows
+├── encode-invariant/
+└── ...
+
+~/.codex/AGENTS.md                   # Rig managed block + hướng dẫn cá nhân
 ```
 
 ---
@@ -69,6 +79,7 @@ your-project/                        # Per-project
 ### Planning & Design
 | Command | Chức năng |
 |---|---|
+| `$rig-harness` | Codex router: tự phân loại và chọn đúng workflow overlay |
 | `/init` | Khởi tạo dự án + harness.db + plans structure |
 | `/plan` | Lên kế hoạch tính năng & Durable Plans |
 | `/design` | Thiết kế kỹ thuật (DB, API, Flow, ADR) |
@@ -132,8 +143,8 @@ rig query backlog --open                    # Pending friction items
 │  - harness.db → SQLite Durable Layer                   │
 ├────────────────────────────────────────────────────────┤
 │  Layer 2: WORKFLOW OVERLAYS & AGENT SKILLS             │
-│  - 15 lightweight overlays mapped to slash commands    │
-│  - 5 specialized agent skills ($skill)                 │
+│  - Antigravity: lightweight overlays + slash commands  │
+│  - Codex: $rig-harness router + plugin skills           │
 ├────────────────────────────────────────────────────────┤
 │  Layer 3: TOOLS                                        │
 │  - rig CLI | Graphify | Git                            │

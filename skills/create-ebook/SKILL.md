@@ -8,7 +8,7 @@ description: Viết giáo trình, sách, ebook bài bản theo Chu trình Sư ph
 Biên soạn giáo trình, tài liệu bài giảng đại học chuẩn mực khoa học và sư phạm.
 
 ## Nguyên tắc Văn phong & Đề mục
-Tham chiếu: `~/.gemini/antigravity/plugins/education/guides/academic_textbook_style_guide.md`
+Đọc `references/academic_textbook_style_guide.md` trong thư mục skill này.
 - **Khách quan, trung tính:** Thể trần thuật, không dùng ngôi thứ nhất.
 - **Loại bỏ từ ngữ cảm tính:** Cấm các từ `kinh điển`, `ví dụ thực tế`, `sâu sắc`, `cốt tử`, `hoàn hảo`, `câu châm ngôn` → Chỉ dùng `Ví dụ: ...`.
 - **Cấu trúc đề mục:** Phân cấp `## 1.`, `### 1.1.`, `#### a)`, tuyệt đối không dùng chữ "CHƯƠNG" trong bài học.
@@ -24,10 +24,10 @@ Tham chiếu: `~/.gemini/antigravity/plugins/education/guides/academic_textbook_
 1. Soạn thảo file bài học `.md`
 2. Chạy Anti-Check Linter bắt buộc:
    ```bash
-   python ~/.gemini/antigravity/plugins/education/tools/lint_textbook.py <file.md>
+   python <skill-dir>/scripts/lint_textbook.py <file.md>
    ```
 3. Xuất file DOCX chuẩn in ấn A4 (Lề trái 3cm, Times New Roman 13pt):
    ```bash
-   python ~/.gemini/antigravity/plugins/education/tools/export_docx.py <file.md> <file.docx>
+   python <skill-dir>/scripts/export_docx.py <file.md> <file.docx>
    ```
 4. Tạo ngân hàng câu hỏi CodeRunner XML (`/question`).

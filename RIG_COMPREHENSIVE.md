@@ -19,8 +19,8 @@ Rig uses a layered architecture to decouple general process control (Harness Cor
 │  - harness.db (SQLite persistent state engine)          │
 ├────────────────────────────────────────────────────────┤
 │  Layer 2: WORKFLOW OVERLAYS & AGENT SKILLS             │
-│  - 15 lightweight markdown guides mapped to commands   │
-│  - 5 specialized agent skills ($skill)                 │
+│  - Antigravity slash-command workflow overlays         │
+│  - Codex $rig-harness router and plugin skills         │
 ├────────────────────────────────────────────────────────┤
 │  Layer 3: PLUGINS                                      │
 │  - Education workflows & custom tools                  │
@@ -35,7 +35,7 @@ Rig uses a layered architecture to decouple general process control (Harness Cor
 
 When installed, files are organized into a global directory (shared across all projects) and a local directory (per-project state and documentation).
 
-#### Global Directory: `~/.gemini/`
+#### Antigravity Global Directory: `~/.gemini/`
 * `~/.gemini/GEMINI.md` — Entrypoint configuration (~25 lines). Tells the agent to look for global instructions in `~/.gemini/antigravity/`.
 * `~/.gemini/rig_version` — Stores the currently installed version string (e.g., `5.2.0`).
 * `~/.gemini/antigravity/core/` — Contains harness rules:
@@ -45,13 +45,20 @@ When installed, files are organized into a global directory (shared across all p
   * `patterns/encoding-invariants.md`: Invariant encoding specifications.
   * `communication-style.md`: Comm guidelines (Vietnamese primary, error parsing table).
   * `templates/`: Templates for `exec-plan.md`, `application-runbook.md`, `harness-improvement.md`, `decision.md`, `story.md`.
-* `~/.gemini/antigravity/skills/` — 5 specialized agent skills:
+* `~/.gemini/antigravity/skills/` — Harness and domain agent skills, including:
+  * `rig-harness/`
   * `encode-invariant/`
   * `onboard-repository/`
   * `audit-onboarding-proposal/`
   * `improve-harness/`
   * `engineering-wisdom/`
 * `~/.gemini/antigravity/workflows/` — Core overlay files corresponding to the 15 slash commands.
+
+#### Codex Global Directories
+* `~/.agents/skills/` — Standalone Codex skills, including the `$rig-harness` router and specialized Rig skills.
+* `~/.codex/AGENTS.md` — Personal Codex guidance. The installer owns only the bounded `RIG_CODEX` block and preserves other content.
+* `.codex-plugin/plugin.json` — Repository-root plugin manifest for packaging the complete Rig skill collection.
+* `skills/rig-harness/references/` — Generated self-contained copies of Core and workflow sources for progressive disclosure.
 
 #### Local Project Directory: `your-project/`
 * `harness.db` — SQLite database (ignored via `.gitignore`). Stores active plans, stories, decisions, traces, session state, and backlog items.

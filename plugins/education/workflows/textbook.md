@@ -13,7 +13,8 @@ description: 📚 Viết ebook/textbook học thuật (Chu trình Sư phạm 5 b
 ```
 
 ## Quy chuẩn Biên soạn Sư phạm & Văn phong Học thuật
-Bắt buộc tuân thủ tài liệu: `~/.gemini/antigravity/plugins/education/guides/academic_textbook_style_guide.md`
+Bắt buộc dùng `$create-ebook`; skill này chứa style guide và công cụ kiểm tra
+tương thích với cả Codex và Antigravity.
 1. **Thể trần thuật khách quan:** Không dùng ngôi thứ nhất ("chúng ta", "tôi", "bạn").
 2. **Cấm từ ngữ cảm tính / phóng đại:** `kinh điển`, `ví dụ thực tế`, `sâu sắc`, `cốt tử`, `hoàn hảo`, `câu châm ngôn`, `then chốt`, `vô cùng`, `kỳ diệu` → Chỉ ghi trực diện: `Ví dụ: ...`.
 3. **Phân cấp đề mục chuẩn đại học:** Không dùng chữ "CHƯƠNG" trong bài học. Sử dụng:
@@ -35,14 +36,14 @@ Mỗi tiểu mục kiến thức phải triển khai đầy đủ:
 **GATE CHECK BẮT BUỘC (Bước 1.1 - Anti-Check Linter):**
 Chạy lệnh kiểm thử văn phong tự động:
 ```bash
-python ~/.gemini/antigravity/plugins/education/tools/lint_textbook.py <path_to_file.md>
+python <create-ebook-skill-dir>/scripts/lint_textbook.py <path_to_file.md>
 ```
 Phải đạt `✅ [ANTI-CHECK THÀNH CÔNG]` 100% trước khi chuyển sang bước tiếp theo.
 
 ### Bước 2: Export DOCX (`.docx`)
 Chạy lệnh chuyển đổi định dạng:
 ```bash
-python ~/.gemini/antigravity/plugins/education/tools/export_docx.py <input.md> <output.docx>
+python <create-ebook-skill-dir>/scripts/export_docx.py <input.md> <output.docx>
 ```
 Đạt chuẩn in ấn đại học: Khổ A4, Lề trái 3.0cm, Lề phải/trên/dưới 2.0cm, Font Times New Roman 13pt, khối code Consolas 10pt có khung viền xám, bảng biểu tiêu đề xanh `#003366`.
 
