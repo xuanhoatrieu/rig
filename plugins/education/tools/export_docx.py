@@ -100,8 +100,38 @@ def set_table_borders(table, color="D1D5DB", sz="4", val="single"):
     ''')
     tblPr.append(borders)
 
+def set_run_xml_font(rPr, font_name="Times New Roman", sz_pt=13, is_bold=None, color_hex="222222"):
+    """Thiết lập phông chữ ở cấp độ OpenXML để loại bỏ hoàn toàn thuộc tính Theme (Aptos/Calibri)"""
+    # 1. Xóa rFonts cũ và đặt lại thuộc tính tường minh không dùng Theme
+    for el in rPr.findall(qn('w:rFonts')):
+        rPr.remove(el)
+    new_rFonts = parse_xml(f'<w:rFonts {nsdecls("w")} w:ascii="{font_name}" w:hAnsi="{font_name}" w:cs="{font_name}" w:eastAsia="{font_name}"/>')
+    rPr.append(new_rFonts)
+
+    # 2. Đặt cỡ chữ (Half-points: 13pt = 26)
+    if sz_pt is not None:
+        sz_val = int(sz_pt * 2)
+        for el in rPr.findall(qn('w:sz')) + rPr.findall(qn('w:szCs')):
+            rPr.remove(el)
+        rPr.append(parse_xml(f'<w:sz {nsdecls("w")} w:val="{sz_val}"/>'))
+        rPr.append(parse_xml(f'<w:szCs {nsdecls("w")} w:val="{sz_val}"/>'))
+
+    # 3. Đặt in đậm
+    if is_bold is not None:
+        for el in rPr.findall(qn('w:b')) + rPr.findall(qn('w:bCs')):
+            rPr.remove(el)
+        if is_bold:
+            rPr.append(parse_xml(f'<w:b {nsdecls("w")}/>'))
+            rPr.append(parse_xml(f'<w:bCs {nsdecls("w")}/>'))
+
+    # 4. Đặt màu chữ
+    if color_hex is not None:
+        for el in rPr.findall(qn('w:color')):
+            rPr.remove(el)
+        rPr.append(parse_xml(f'<w:color {nsdecls("w")} w:val="{color_hex}"/>'))
+
 def format_docx(input_docx, output_docx=None):
-    """Hậu xử lý tài liệu DOCX để chuẩn hóa lề, bảng biểu và khối code"""
+    """Hậu xử lý tài liệu DOCX để chuẩn hóa lề, phông chữ 13pt Times New Roman, căn đều 2 bên, bảng biểu và khối code"""
     if output_docx is None:
         output_docx = input_docx
 
@@ -116,35 +146,38 @@ def format_docx(input_docx, output_docx=None):
         section.top_margin = Cm(2.0)
         section.bottom_margin = Cm(2.0)
 
-    # 2. Xử lý đoạn văn bản (Paragraphs)
+    # 2. Xử lý đoạn văn bản (Paragraphs) — dùng OpenXML override
     for p in doc.paragraphs:
         style_name = p.style.name if p.style else ""
 
+        # Nếu là tiêu đề (Heading 1..4, Title)
+        if style_name.startswith('Heading') or style_name == 'Title':
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            for run in p.runs:
+                rPr = run._r.get_or_add_rPr()
+                set_run_xml_font(rPr, "Times New Roman", 13, is_bold=True, color_hex="003366")
+
         # Nếu là đoạn văn bản thông thường
-        if style_name in ['Normal', 'Body Text', 'List Paragraph', 'Compact']:
-            if not style_name.startswith('List'):
-                p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        elif style_name in ['Normal', 'Body Text', 'List Paragraph', 'Compact', 'First Paragraph']:
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             p.paragraph_format.line_spacing = 1.25
             for run in p.runs:
-                if not run.font.name:
-                    run.font.name = 'Times New Roman'
-                if not run.font.size:
-                    run.font.size = Pt(13)
+                rPr = run._r.get_or_add_rPr()
+                set_run_xml_font(rPr, "Times New Roman", 13, color_hex="222222")
 
         # Nếu là khối mã nguồn (Source Code)
         elif style_name == 'Source Code':
             p.paragraph_format.line_spacing = 1.15
             p.paragraph_format.left_indent = Cm(0.3)
-            # Thêm viền / nền nhẹ cho từng dòng code nếu cần
+            # Thêm viền / nền nhẹ cho từng dòng code
             pPr = p._p.get_or_add_pPr()
             shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="F3F4F6"/>')
             pPr.append(shd)
             pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:left w:val="single" w:sz="18" w:space="8" w:color="3B82F6"/></w:pBdr>')
             pPr.append(pBdr)
             for run in p.runs:
-                run.font.name = 'Consolas'
-                run.font.size = Pt(10)
-                run.font.color.rgb = RGBColor(0x1E, 0x29, 0x3B)
+                rPr = run._r.get_or_add_rPr()
+                set_run_xml_font(rPr, "Consolas", 10, color_hex="1E293B")
 
     # 3. Xử lý bảng biểu (Tables)
     for table in doc.tables:

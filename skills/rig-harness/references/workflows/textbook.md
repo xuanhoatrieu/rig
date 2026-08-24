@@ -1,5 +1,5 @@
 ---
-description: 📚 Viết ebook/textbook học thuật (Chu trình Sư phạm 5 bước & Anti-Check Linter)
+description: 📚 Viết ebook/textbook học thuật (Chu trình Sư phạm 5 bước, Trực quan hóa Đa phương thức & Linter)
 ---
 
 # /textbook — Ebook/Textbook Writing
@@ -33,6 +33,11 @@ Mỗi tiểu mục kiến thức phải triển khai đầy đủ:
 4. **Mã nguồn chuẩn mực:** Code Python/NumPy chuẩn PEP 8 có Type Hints, Docstring, xử lý lỗi biên.
 5. **Lưu ý kỹ thuật:** Đánh giá độ phức tạp O(·), quản lý bộ nhớ (View vs Copy).
 
+**TRỰC QUAN HÓA NỘI DUNG ĐA PHƯƠNG THỨC (Dual-Engine Visualization):**
+- **Động cơ 1 — Sơ đồ Kỹ thuật & Toán học:** Dùng script Python (`matplotlib`/`PIL`) để vẽ chính xác các kiến trúc bộ nhớ, lưới ma trận cắt lát, các trục đa chiều (Axis), biểu đồ hàm số với độ phân giải cao PNG 300 DPI.
+- **Động cơ 2 — Hình ảnh Trực quan Khái niệm (AI Image Generation):** Gọi model tạo ảnh (`generate_image`) để sinh các hình minh họa sinh động về ngữ cảnh ứng dụng AI thế giới thực, hệ sinh thái công nghệ, infographic quy trình xử lý dữ liệu.
+- Toàn bộ hình ảnh lưu tại `baigiang/baiXX/textbook/images/` và nhúng trực tiếp vào Markdown: `![Hình X.Y: Chú thích](images/figXY_ten_hinh.png)`.
+
 **GATE CHECK BẮT BUỘC (Bước 1.1 - Anti-Check Linter):**
 Chạy lệnh kiểm thử văn phong tự động:
 ```bash
@@ -45,7 +50,10 @@ Chạy lệnh chuyển đổi định dạng:
 ```bash
 python <create-ebook-skill-dir>/scripts/export_docx.py <input.md> <output.docx>
 ```
-Đạt chuẩn in ấn đại học: Khổ A4, Lề trái 3.0cm, Lề phải/trên/dưới 2.0cm, Font Times New Roman 13pt, khối code Consolas 10pt có khung viền xám, bảng biểu tiêu đề xanh `#003366`.
+Đạt chuẩn in ấn đại học:
+- Khổ **A4**, **Lề Trái 3.0cm**, Lề Phải/Trên/Dưới **2.0cm**.
+- Phông **Times New Roman**, cỡ chữ **13pt áp dụng đồng nhất cho toàn bộ văn bản và tất cả các tiêu đề (Heading 1, 2, 3, Title)**.
+- **Căn đều 2 bên khổ giấy (Justified)** cho tất cả các đoạn văn bản.
 
 ### Bước 3: Tạo Ngân hàng Câu hỏi CodeRunner (`.md` & `.xml`)
 Tạo bộ bài tập lập trình Python 3 CodeRunner tương ứng để chấm điểm tự động.
