@@ -1,11 +1,11 @@
-# 🔧 Rig — Harness-Core Workflow Framework v5.1.0
+# 🔧 Rig — Harness-Core Workflow Framework v5.2.0
 
 Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm.
 
 > **Triết lý:** Harness là core (quản lý QUY TRÌNH & INVARIANTS), Workflows là overlays (hướng dẫn CÁCH LÀM), Skills là công cụ chuyên sâu.
 > **Tham khảo:** Inspired by [Harness Engineering](https://openai.com/index/harness-engineering/) & [repository-harness](https://github.com/hoangnb24/repository-harness).
 
-## ✨ Highlights v5.1.0
+## ✨ Highlights v5.2.0
 
 | Feature | Chi tiết |
 |---|---|
@@ -39,7 +39,7 @@ iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.p
 ```
 ~/.gemini/                           # Global (mọi dự án)
 ├── GEMINI.md                        # Entry point (~25 dòng)
-├── rig_version                      # 5.1.0
+├── rig_version                      # 5.2.0
 └── antigravity/
     ├── core/                        # Harness source of truth & rules
     │   ├── HARNESS.md               # Task loop & rules

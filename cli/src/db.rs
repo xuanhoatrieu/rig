@@ -708,7 +708,7 @@ pub fn query_stats() -> Result<(), Box<dyn std::error::Error>> {
         )
         .unwrap_or(0.0);
 
-    println!("📊 Rig Harness Stats (v5.1.0)");
+    println!("📊 Rig Harness Stats (v{})", env!("CARGO_PKG_VERSION"));
     println!("──────────────────────────────────────────");
     println!("Plans:      {}/{} active", active_plans, total_plans);
     println!(

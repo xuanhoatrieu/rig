@@ -1,4 +1,4 @@
-# Product Contract — Rig v5.0
+# Product Contract — Rig v5.2.0
 
 ## Overview
 Rig là framework quy trình Harness-Core dành cho AI coding agent và lập trình viên.
