@@ -1,4 +1,4 @@
-# Product Contract — Rig v5.2.0
+# Product Contract — Rig v5.2.1
 
 ## Overview
 Rig là framework quy trình Harness-Core dành cho AI coding agent và lập trình viên, hỗ trợ OpenAI Codex và Gemini Antigravity từ cùng một Core.
