@@ -1,4 +1,4 @@
-# 🔧 Rig — Harness-Core Workflow Framework v5.2.2
+# 🔧 Rig — Harness-Core Workflow Framework v5.2.3
 
 Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm. Cùng một repository hỗ trợ cả **OpenAI Codex** và **Gemini Antigravity**.
 
@@ -42,7 +42,7 @@ Một lần cài cấu hình cả Codex và Antigravity. Xem hướng dẫn Code
 ```
 ~/.gemini/                           # Global (mọi dự án)
 ├── GEMINI.md                        # Entry point (~25 dòng)
-├── rig_version                      # 5.2.2
+├── rig_version                      # 5.2.3
 └── antigravity/
     ├── core/                        # Harness source of truth & rules
     │   ├── HARNESS.md               # Task loop & rules

@@ -1,5 +1,5 @@
 ---
-description: 🚀 Khởi tạo dự án mới với Harness Core v5.2.2
+description: 🚀 Khởi tạo dự án mới với Harness Core v5.2.3
 extends: core/HARNESS.md
 tools: rig, git
 ---

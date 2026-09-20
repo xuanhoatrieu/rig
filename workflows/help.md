@@ -1,5 +1,5 @@
 ---
-description: ❓ Trợ giúp & Hướng dẫn Rig v5.2.2
+description: ❓ Trợ giúp & Hướng dẫn Rig v5.2.3
 ---
 
 # /help — Help & Guidance

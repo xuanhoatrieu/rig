@@ -88,12 +88,15 @@ graph TD
 
 ## 3. Luồng 1: Đóng Gói APK Test Local
 
-### 3.1. Nguyên tắc thực thi
-* **Không kiểm tra môi trường thừa**: Giả định máy/server đã cài sẵn Java JDK, Android SDK, Node.js và EAS CLI.
-* **Chạy thẳng lệnh build**:
+### 3.1. Nguyên tắc thực thi (Zero-Check & Local-Only)
+> ⚠️ **LƯU Ý VỀ TÀI KHOẢN EAS FREE (15 BUILDS / THÁNG):**  
+> Tài khoản Expo/EAS miễn phí chỉ có **15 lượt build Cloud mỗi tháng**.  
+> Do đó, khi đóng gói APK test nội bộ, **BẮT BUỘC BUILD LOCAL 100%** bằng cờ `--local`.  
+> Build local chạy trên CPU/RAM máy cá nhân, **hoàn toàn miễn phí và không giới hạn số lần**.  
+> Không hỏi thêm người dùng hay kiểm tra môi trường thừa, chạy thẳng lệnh:
 
 ```bash
-# 1. Chạy build APK local qua EAS CLI (dùng profile preview)
+# Chạy build APK local 100% (không tiêu tốn hạn ngạch EAS Cloud)
 eas build --platform android --profile preview --local
 ```
 

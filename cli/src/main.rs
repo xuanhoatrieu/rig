@@ -7,7 +7,7 @@ mod update;
 #[command(
     name = "rig",
     version,
-    about = "Harness-Core workflow framework CLI v5.2.2"
+    about = "Harness-Core workflow framework CLI v5.2.3"
 )]
 struct Cli {
     #[command(subcommand)]

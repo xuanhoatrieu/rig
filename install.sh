@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Rig v5.2.2 Installer — Harness-Core Workflow Framework
+# Rig v5.2.3 Installer — Harness-Core Workflow Framework
 # Usage: curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash
 
-VERSION="5.2.2"
+VERSION="5.2.3"
 REPO="xuanhoatrieu/rig"
 GEMINI_DIR="$HOME/.gemini"
 ANTIGRAVITY_DIR="$GEMINI_DIR/antigravity"
@@ -136,7 +136,7 @@ else
         echo "📦 Creating fallback rig bash CLI wrapper..."
         cat << 'EOF' > "$BIN_DIR/rig"
 #!/usr/bin/env bash
-VERSION="5.2.2"
+VERSION="5.2.3"
 case "${1:-help}" in
     update)
         curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash

@@ -1,8 +1,8 @@
-# Rig v5.2.2 Installer — Windows PowerShell
+# Rig v5.2.3 Installer — Windows PowerShell
 # Usage: iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.ps1) }"
 
 $ErrorActionPreference = "Stop"
-$Version = "5.2.2"
+$Version = "5.2.3"
 $Repo = "xuanhoatrieu/rig"
 $GeminiDir = "$env:USERPROFILE\.gemini"
 $AntigravityDir = "$GeminiDir\antigravity"
