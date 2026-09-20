@@ -1,4 +1,4 @@
-# Architecture — Rig v5.2.1
+# Architecture — Rig v5.2.2
 
 ## System Overview
 

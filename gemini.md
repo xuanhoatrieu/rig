@@ -1,4 +1,4 @@
-# Rig — Harness-Core Workflow Framework v5.2.1
+# Rig — Harness-Core Workflow Framework v5.2.2
 
 ## Core Rule — ÁP DỤNG CHO MỌI REQUEST
 Mọi request (cả ngôn ngữ tự nhiên, / commands, lẫn $ skills) đều đi qua Harness Task Loop:

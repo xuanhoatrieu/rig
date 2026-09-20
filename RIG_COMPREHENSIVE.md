@@ -1,6 +1,6 @@
-# 📖 Rig — Harness-Core Workflow Framework v5.2.1 Comprehensive Specification
+# 📖 Rig — Harness-Core Workflow Framework v5.2.2 Comprehensive Specification
 
-Rig is a workflow operating framework designed to govern how AI coding agents collaborate with humans. This document acts as the complete, self-contained specification of Rig v5.2.1. It details the architecture, file structures, CLI mechanics, SQLite schema, workflows, skills, and release pipeline.
+Rig is a workflow operating framework designed to govern how AI coding agents collaborate with humans. This document acts as the complete, self-contained specification of Rig v5.2.2. It details the architecture, file structures, CLI mechanics, SQLite schema, workflows, skills, and release pipeline.
 
 ---
 
@@ -37,7 +37,7 @@ When installed, files are organized into a global directory (shared across all p
 
 #### Antigravity Global Directory: `~/.gemini/`
 * `~/.gemini/GEMINI.md` — Entrypoint configuration (~25 lines). Tells the agent to look for global instructions in `~/.gemini/antigravity/`.
-* `~/.gemini/rig_version` — Stores the currently installed version string (e.g., `5.2.1`).
+* `~/.gemini/rig_version` — Stores the currently installed version string (e.g., `5.2.2`).
 * `~/.gemini/antigravity/core/` — Contains harness rules:
   * `HARNESS.md`: The primary state-machine rules and instructions.
   * `WORKFLOW.md`: 4 Work shapes and repository flows.
