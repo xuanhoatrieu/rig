@@ -1,4 +1,5 @@
 ---
+name: video
 description: 🎬 Tạo video animation ML bằng Manim
 ---
 

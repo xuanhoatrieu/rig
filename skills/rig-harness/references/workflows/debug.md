@@ -1,4 +1,5 @@
 ---
+name: debug
 description: 🐛 Sửa lỗi + Rollback
 extends: core/HARNESS.md
 tools: rig, graphify, git

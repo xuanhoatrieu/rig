@@ -1,0 +1,11 @@
+{
+  "name": "rig",
+  "displayName": "Rig",
+  "version": "5.3.0",
+  "description": "Harness-core workflows, durable planning, validation, and evidence-backed repository skills for Antigravity and Codex.",
+  "suggestedPrompts": [
+    "Use $rig-harness to handle this repository task.",
+    "Use $onboard-repository to map this codebase.",
+    "Use $encode-invariant to enforce this accepted rule."
+  ]
+}

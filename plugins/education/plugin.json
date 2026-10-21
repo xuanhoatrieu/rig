@@ -1,19 +1,11 @@
 {
   "name": "rig-education",
-  "version": "1.1.0",
-  "description": "Education workflows for Rig: academic textbook, PPTX, quiz generation, video, export",
-  "workflows": [
-    "workflows/textbook.md",
-    "workflows/pptx.md",
-    "workflows/question.md",
-    "workflows/video.md",
-    "workflows/export.md"
-  ],
-  "guides": [
-    "guides/academic_textbook_style_guide.md"
-  ],
-  "tools": [
-    "tools/lint_textbook.py",
-    "tools/export_docx.py"
+  "displayName": "Rig Education",
+  "version": "5.3.0",
+  "description": "Education skills and tools for Rig: academic textbook authoring, DOCX export, PPTX slide generation, Bloom quiz generation, and Manim video animation.",
+  "suggestedPrompts": [
+    "Use $create-ebook to write an academic textbook lesson.",
+    "Use $create-question to generate Bloom-taxonomy quiz questions.",
+    "Use $create-pptx to create presentation slides from a lesson."
   ]
 }

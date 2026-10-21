@@ -1,4 +1,5 @@
 ---
+name: update
 description: 🔄 Cập nhật Rig Framework & CLI lên phiên bản mới nhất
 ---
 

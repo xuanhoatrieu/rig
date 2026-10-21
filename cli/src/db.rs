@@ -356,7 +356,11 @@ pub fn story_verify(id: &str) -> Result<(), Box<dyn std::error::Error>> {
     let cmd = cmd.ok_or_else(|| format!("Story {} has no verify command", id))?;
     println!("🔍 Running: {}", cmd);
 
-    let output = Command::new("sh").arg("-c").arg(&cmd).output()?;
+    let output = if cfg!(target_os = "windows") {
+        Command::new("cmd").arg("/C").arg(&cmd).output()?
+    } else {
+        Command::new("sh").arg("-c").arg(&cmd).output()?
+    };
 
     let result = if output.status.success() {
         "pass"
@@ -376,6 +380,27 @@ pub fn story_verify(id: &str) -> Result<(), Box<dyn std::error::Error>> {
         let stderr = String::from_utf8_lossy(&output.stderr);
         println!("❌ Story {} verification: FAIL\n{}", id, stderr);
         std::process::exit(1);
+    }
+    Ok(())
+}
+
+pub fn story_verify_all() -> Result<(), Box<dyn std::error::Error>> {
+    let conn = open_db()?;
+    conn.execute_batch(SCHEMA)?;
+    let mut stmt = conn.prepare(
+        "SELECT id FROM story WHERE verify_command IS NOT NULL AND verify_command != '' ORDER BY id",
+    )?;
+    let ids: Vec<String> = stmt
+        .query_map([], |row| row.get::<_, String>(0))?
+        .collect::<Result<Vec<_>, _>>()?;
+
+    if ids.is_empty() {
+        println!("ℹ️  No stories have a verify_command configured.");
+        return Ok(());
+    }
+
+    for id in ids {
+        story_verify(&id)?;
     }
     Ok(())
 }
@@ -553,6 +578,20 @@ pub fn doctor() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         println!("⚠️  [Brain] .brain/brain.json missing.");
         warnings += 1;
+    }
+
+    // 5. Check AGY CLI & Global Adapter readiness
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+    if !home.is_empty() {
+        let agy_skill = Path::new(&home).join(".gemini/config/skills/rig-harness/SKILL.md");
+        if agy_skill.exists() || Path::new(".agents/skills.json").exists() {
+            println!("✅ [AGY CLI] Antigravity CLI skills & rules configured");
+        } else {
+            println!("⚠️  [AGY CLI] Global AGY CLI skills missing (~/.gemini/config/skills/). Run 'rig update' or './install.sh'.");
+            warnings += 1;
+        }
     }
 
     // 5. Check active plans vs stories
@@ -872,6 +911,23 @@ pub fn session_set(key: &str, value: &str) -> Result<(), Box<dyn std::error::Err
     Ok(())
 }
 
+pub fn session_get(key: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let conn = open_db()?;
+    conn.execute_batch(SCHEMA)?;
+    let val: Option<String> = conn
+        .query_row(
+            "SELECT value FROM session WHERE key = ?1",
+            params![key],
+            |row| row.get(0),
+        )
+        .ok();
+    match val {
+        Some(v) => println!("{}", v),
+        None => println!("(not set)"),
+    }
+    Ok(())
+}
+
 pub fn backlog_add(
     title: &str,
     pain: &str,
@@ -905,9 +961,56 @@ pub fn backlog_close(id: i64, outcome: &str) -> Result<(), Box<dyn std::error::E
 }
 
 fn truncate(s: &str, max: usize) -> String {
-    if s.len() <= max {
+    if s.chars().count() <= max {
         s.to_string()
     } else {
-        format!("{}…", &s[..max - 1])
+        let prefix: String = s.chars().take(max.saturating_sub(1)).collect();
+        format!("{}…", prefix)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_truncate_utf8_vietnamese_safe() {
+        let text = "Kiểm tra chuỗi tiếng Việt có dấu dài hơn giới hạn";
+        let truncated = truncate(text, 15);
+        assert_eq!(truncated.chars().count(), 15);
+        assert!(truncated.ends_with('…'));
+    }
+
+    #[test]
+    fn test_schema_and_operations_in_memory() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(SCHEMA).unwrap();
+
+        conn.execute(
+            "INSERT INTO intake (input_type, summary, lane) VALUES (?1, ?2, ?3)",
+            params!["change-request", "Upgrade AGY CLI", "normal"],
+        )
+        .unwrap();
+
+        conn.execute(
+            "INSERT INTO story (id, title, lane, verify_command) VALUES (?1, ?2, ?3, ?4)",
+            params!["US-001", "AGY CLI Support", "normal", "cargo test"],
+        )
+        .unwrap();
+
+        conn.execute(
+            "INSERT OR REPLACE INTO session (key, value) VALUES (?1, ?2)",
+            params!["active_feature", "agy-cli"],
+        )
+        .unwrap();
+
+        let val: String = conn
+            .query_row(
+                "SELECT value FROM session WHERE key = 'active_feature'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(val, "agy-cli");
     }
 }

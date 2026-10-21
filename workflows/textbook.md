@@ -1,4 +1,5 @@
 ---
+name: textbook
 description: 📚 Viết ebook/textbook học thuật (Chu trình Sư phạm 5 bước, Trực quan hóa Đa phương thức & Linter)
 ---
 

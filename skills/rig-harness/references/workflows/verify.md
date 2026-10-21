@@ -1,4 +1,5 @@
 ---
+name: verify
 description: ✅ Chạy & Kiểm thử
 extends: core/HARNESS.md
 tools: rig

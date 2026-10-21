@@ -1,4 +1,5 @@
 ---
+name: save-brain
 description: 💾 Lưu kiến thức
 extends: core/HARNESS.md
 tools: rig

@@ -7,7 +7,7 @@ mod update;
 #[command(
     name = "rig",
     version,
-    about = "Harness-Core workflow framework CLI v5.2.3"
+    about = "Harness-Core workflow framework CLI v5.3.0"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -157,6 +157,8 @@ enum StoryAction {
     },
     /// Run story verification command
     Verify { id: String },
+    /// Run verification commands for all stories that define one
+    VerifyAll,
 }
 
 #[derive(Subcommand)]
@@ -210,6 +212,13 @@ enum SessionAction {
         #[arg(long)]
         value: String,
     },
+    /// Get a session value by key
+    Get {
+        #[arg(long)]
+        key: String,
+    },
+    /// List all session key-value pairs
+    List,
 }
 
 #[derive(Subcommand)]
@@ -276,6 +285,7 @@ fn main() {
                 verify.as_deref(),
             ),
             StoryAction::Verify { id } => db::story_verify(&id),
+            StoryAction::VerifyAll => db::story_verify_all(),
         },
         Commands::Decision { action } => match action {
             DecisionAction::Add {
@@ -313,6 +323,8 @@ fn main() {
         },
         Commands::Session { action } => match action {
             SessionAction::Set { key, value } => db::session_set(&key, &value),
+            SessionAction::Get { key } => db::session_get(&key),
+            SessionAction::List => db::query_session(),
         },
         Commands::Backlog { action } => match action {
             BacklogAction::Add {

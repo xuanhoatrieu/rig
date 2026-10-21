@@ -1,4 +1,5 @@
 ---
+name: code
 description: 💻 Viết code theo spec
 extends: core/HARNESS.md
 tools: rig, graphify, git

@@ -343,12 +343,9 @@ Read `references/evidence-capsule-v2.md` completely before constructing the
 capsule. Follow its exact field names, vocabularies, and hash definitions.
 
 Do not manually copy source, patch, producer, or destination hashes into the
-final answer. Build one compact JSON spec in memory and pipe it to
-`scripts/emit_evidence_bundle.py`. The spec contains boundary rows, atomic
+final answer. Build one compact JSON spec in memory (boundary rows, atomic
 claims with unhashed source ranges, complete proposed destination images,
-unknowns, and limitations. The emitter reads every pinned blob, computes every
-digest, renders each patch, and writes one authenticated bundle to stdout
-without creating a draft file.
+unknowns, and limitations) and pipe it to `scripts/emit_evidence_bundle.py`:
 
 ```text
 <non-materializing command that prints the JSON spec> |
@@ -359,52 +356,30 @@ without creating a draft file.
 ```
 
 Run the emitter as the final tool call with an output budget large enough to
-retain the complete result. Do not rerun it unless it fails. Do not reproduce
-its patch or capsule bytes in the assistant message. The raw tool result is the
-auditable artifact; the final answer reports its bundle digest, hunk IDs,
-destinations, classifications, gate result, and exact approval instruction.
+retain the complete result. Do not rerun it unless it fails, and do not
+reproduce its patch or capsule bytes in the assistant message. Report its
+bundle digest, hunk IDs, destinations, classifications, gate result, and exact
+approval instruction.
 
-Use schema `onboarding-evidence-capsule/v2`. The emitted capsule is an
-authenticated index, not authority. It contains exactly:
+Use schema `onboarding-evidence-capsule/v2` containing `tested_repository`,
+`producer_skill`, `boundary` (`git`, `ignored_or_managed`, `runtime`,
+`temporary_paths` with `Pass`/`Fail`/`Unknown`), `claims` (atomic single-line
+clause, hunk ID, `Authoritative`/`Observed`/`Derived`, exact sources), `hunks`
+(destination, before/after hashes, patch hash, claim IDs, unknowns), and
+`limitations`.
 
-- `tested_repository`: absolute root, full 40-character revision, and branch;
-- `producer_skill`: repository-relative skill path and file SHA-256;
-- `boundary`: separate rows covering `git`, `ignored_or_managed`, `runtime`,
-  and `temporary_paths`, with normalized initial/final evidence hashes and a
-  `Pass`, `Fail`, or `Unknown` result;
-- `claims`: one atomic, single-line proposed clause per ID, its hunk ID,
-  `Authoritative`/`Observed`/`Derived` classification, and every exact source;
-- `hunks`: destination, whole-file destination hashes before and after
-  in-memory patch application, displayed patch hash, claim IDs, and unresolved
-  unknowns;
-- `limitations`: remaining audit or environment limitations.
+Record repository-relative path, inclusive start/end lines, and role for each
+source (`revision` only when differing from tested revision); never cite an
+unpinned working-tree line. Repeat each claim's complete causal chain inside
+`sources` (entry command, flag-to-branch, branch order, implementation; for
+constants/fallbacks cite definition and use; for failure bypass cite awaited
+call, rejecting callee, and top-level handler). Split conjunctions, sentinel
+lookups, branch selection, file reads, subprocess calls, failure propagation,
+and cleanup absence into separate atomic subject-condition-effect claims.
 
-For each source spec record the repository-relative path, inclusive start/end
-lines, and role. Set `revision` only when it differs from the tested revision.
-The emitter adds the pinned revision and SHA-256 of the exact LF-terminated
-range. Never cite a working-tree line without a pinned revision. Split
-conjunctions into atomic claim records even when they remain one
-natural-language sentence.
-
-Repeat each claim's complete causal chain inside its capsule `sources`; prose
-citations elsewhere do not satisfy the capsule. For a command-controlled
-effect, include the package/entry command mapping, flag-to-branch mapping,
-branch ordering, and the called implementation that performs the effect.
-
-Make each capsule claim one subject-condition-effect fact. Split sentinel
-lookup, branch selection, named path, file read, subprocess call, failure
-propagation, and cleanup absence into separate claims even when the patch uses
-one natural-language sentence. When a claim names an exact constant, path, or
-fallback, cite both its definition and its use. When a claim says a failure
-bypasses later work, cite the awaited call, the callee or assertion that
-rejects/throws, and the top-level handler; the callsite alone does not prove
-propagation.
-
-For a boundary row, `Pass` requires equal non-null initial and final hashes;
-`Fail` requires two different hashes; use `Unknown` when either observation is
-missing or cannot prove equivalence. Hash stable normalized observation output,
-not terminal decoration or timestamps. The capsule must reflect Unknowns from
-the prose gate rather than silently upgrading them.
+For boundary rows, `Pass` requires equal non-null initial/final hashes on
+normalized output; `Fail` requires differing hashes; `Unknown` applies when
+either observation is missing or inconclusive and must match the prose gate.
 
 When the sibling audit skill is installed, its read-only validator is:
 
@@ -412,95 +387,54 @@ When the sibling audit skill is installed, its read-only validator is:
 python3 .agents/skills/audit-onboarding-proposal/scripts/validate_evidence_capsule.py --transcript <raw-session.jsonl> --expected-transcript-sha256 <sha256> --repository <tested-worktree>
 ```
 
-The validator can run only after the transcript exists. For new runs it
-extracts the last complete machine bundle emitted before task completion and
-verifies its bundle digest, pinned producer and source blobs, and whole-file
-patch application. Legacy transcripts with capsules in the completed assistant
-message remain readable. Do not create a local draft merely to prevalidate the
-final answer.
+Run the validator only after the transcript exists; never create a local draft
+merely to prevalidate.
 
 ### 6. Report the gate
 
 End the first pass with:
 
 - pinned revision and initial dirty state;
-- operational-path table with evidence classifications;
-- ranked proposal items;
-- exact machine-emitted patch preview with a classification and source for each
-  added or changed claim;
-- the verified managed-marker replacement diff when active managed guidance is
-  stale;
-- one machine-emitted v2 evidence bundle whose marked patches, identifiers, and
-  computed hashes cover every proposed clause;
-- blockers and unsupported claims avoided;
-- final Git status/diff comparison;
-- pre/post ignored-state and runtime-ownership comparison where relevant,
-  explicitly marking any missed or unobservable baseline **Unknown**;
-- the exact patch wording that must be approved for any change.
+- resource ledger and operational-path table with evidence classifications;
+- ranked proposal items and exact machine-emitted patch preview;
+- verified managed-marker replacement diff when active managed guidance is stale;
+- one machine-emitted v2 evidence bundle covering every proposed clause;
+- blockers, unsupported claims avoided, and final Git status/diff comparison;
+- pre/post ignored-state and runtime-ownership comparison (marking any missed or
+  unobservable baseline **Unknown**); and
+- exact patch wording that must be approved for any change.
 
-The gate passes only when repository authority was read, the complete path table
-contains every required field, every patch sentence passes clause-level
-evidence review, the run stopped at suggestions, and all required no-mutation
-comparisons are proven. Git cleanliness alone cannot satisfy the last gate.
+The gate passes only when repository authority was read, the path table has
+every required field, every patch clause passes evidence review, the run
+stopped at suggestions, and all no-mutation comparisons (`git`,
+`ignored_or_managed`, `runtime`, `temporary_paths`) are proven conjunctively
+(any required **Unknown** fails the gate; do not convert an unknown into a pass
+because no mutating command was observed). Score the five methodological gate
+conditions, not repository readiness.
 
-Compute the no-mutation gate conjunctively. Git state, every relevant ignored
-or managed path, runtime ownership, and every task-owned prohibited temporary
-path must each have proven pre/post equivalence; any required **Unknown** makes
-this gate fail. Do not convert an unknown into a pass because no mutating
-command was observed. A discovered repository gap does not by itself fail a
-methodological gate; score the five gate conditions, not repository readiness.
-
-Before assigning scores, perform a contradiction scan:
-
-- each resource/identifier has exactly one ledger row;
-- every checked-in default and fallback-reachability qualifier is present;
-- guaranteed and optional log fields are separated;
-- process-wide evidence is not called instance-local;
-- every write is in the stage where it occurs and cites its full causal chain;
-- absence of cleanup is not promoted to runtime liveness;
-- every **Unknown** is reflected in the conjunctive gate result; and
-- intermediate mistakes corrected during inspection do not remain in the final
-  map, patch, evidence ledger, or score.
-
-If the final state differs from the initial state, disclose every difference
-and treat the pass as failed. Do not repair or erase user-owned changes.
+Before scoring, scan for contradictions: one ledger row per resource/identifier;
+checked-in default and fallback-reachability qualifiers present; guaranteed vs
+optional log fields separated; process-wide evidence not called instance-local;
+writes placed at their actual stage with full causal chain; absence of cleanup
+not promoted to runtime liveness; every **Unknown** reflected in the gate; and
+no intermediate mistakes remaining in final outputs. If final state differs
+from initial state, disclose every difference and fail the pass without
+erasing user-owned changes.
 
 ## Later Pass: Apply Approved Items
 
-Apply only when the user approves the exact displayed patch wording.
+Apply only when the user approves the exact displayed patch wording:
 
-1. Re-read applicable instructions and capture current Git state.
-2. Recheck target-file hashes and recompute the proposal if they changed.
-3. For normative product claims, require existing authority or an explicit user
-   decision. For current operational mechanics, require direct observed
-   evidence, preserve the evidence classification, and phrase them as current
-   behavior. Keep unknowns explicit.
-4. For verified managed-file drift, replace only approved managed-marker
+1. Re-read applicable instructions, capture Git state, and recheck target-file
+   hashes (recompute the proposal if changed).
+2. Require existing authority or explicit user decision for normative claims,
+   and direct observed evidence for current operational mechanics (keeping
+   unknowns explicit).
+3. For verified managed-file drift, replace only approved managed-marker
    content and preserve consumer-owned content outside the markers.
-5. Edit only the approved agent-facing documentation or knowledge files.
-6. Match existing repository structure and terminology; keep the patch small.
-7. Run relevant documentation checks and any repository-prescribed validation.
-8. Inspect the complete diff for invented policy or unrelated changes.
-9. Rerun this skill's inspection logic. It must not propose duplicate content.
-10. Produce a documentation-only replay patch that can be applied to the
-    baseline commit without carrying this skill or other experimental files.
-11. Report changed files, validation evidence, remaining gaps, and the frozen
-    prompt for a separate fresh-agent replay.
-
-When new choices appear during application, stop and return them for approval.
-
-## Concrete Example
-
-Suppose a repository documents `pnpm local:e2e`, its test runner observes
-`/health` and `/chat`, and the root onboarding guide points to a nonexistent
-binary. A verified managed base contains newer instructions without that
-binary.
-
-The first pass follows the active root instructions, reports the unavailable
-binary, verifies the managed-base checksum, and leaves Git unchanged. Its patch
-preview replaces only the stale managed block and links the existing E2E
-procedure. Any new cleanup rule is classified **Decision required**. It must not
-claim a new chat contract or add a universal startup script. After the user
-approves exact patch wording, the later pass applies it and produces a
-skill-free documentation patch for a fresh replay. Success is fewer
-undocumented hints and safer command ordering, not merely more documentation.
+4. Edit only approved documentation/knowledge files with a minimal patch, run
+   relevant checks, and inspect the full diff for invented policy.
+5. Rerun inspection logic (must not propose duplicates), produce a skill-free
+   documentation replay patch, and report changed files, validation evidence,
+   remaining gaps, and the frozen replay prompt. Pause for approval if new
+   choices appear.

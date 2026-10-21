@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Quy tắc Git push, tagging SemVer và release lên GitHub (xuanhoatrieu) tránh duplicate GitHub Actions. Áp dụng khi user yêu cầu push git, push code, đẩy git, hoặc release.
+---
+
 # Quy tắc Git Push & Release cho GitHub (xuanhoatrieu)
 
 Quy tắc này áp dụng khi người dùng yêu cầu: "push git", "push code", "đẩy git", "release", hoặc các yêu cầu liên quan đến việc đẩy mã nguồn lên GitHub.

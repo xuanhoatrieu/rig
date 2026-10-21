@@ -1,4 +1,5 @@
 ---
+name: deploy
 description: 🚀 Deploy production
 extends: core/HARNESS.md
 tools: rig, git

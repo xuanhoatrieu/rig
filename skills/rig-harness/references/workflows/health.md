@@ -1,4 +1,5 @@
 ---
+name: health
 description: 🏥 Review, Audit code & Harness Doctor
 extends: core/HARNESS.md
 tools: rig, graphify

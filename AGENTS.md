@@ -6,8 +6,9 @@ changing shared Harness behavior.
 ## Authority and workflow
 
 - Read `core/HARNESS.md` and `core/WORKFLOW.md` before changing Harness policy.
-- Keep `gemini.md`, `workflows/`, and `plugins/education/plugin.json` compatible
-  with Antigravity.
+- Keep `gemini.md`, `.antigravity-plugin/plugin.json`, `.agents/skills.json`,
+  `workflows/`, and `plugins/education/plugin.json` compatible with Antigravity
+  and `agy` CLI.
 - Keep `.codex-plugin/plugin.json`, `codex/`, and `skills/rig-harness/`
   compatible with Codex.
 - Treat `core/` and `workflows/` as sources. Do not hand-edit their generated

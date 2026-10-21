@@ -1,4 +1,5 @@
 ---
+name: design
 description: 🏗️ Thiết kế kỹ thuật
 extends: core/HARNESS.md
 tools: rig, graphify

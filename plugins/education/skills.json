@@ -1,0 +1,14 @@
+{
+  "entries": [
+    {
+      "path": "../../skills",
+      "include_only": [
+        "create-ebook",
+        "export-ebook",
+        "create-pptx",
+        "create-question",
+        "create-video"
+      ]
+    }
+  ]
+}

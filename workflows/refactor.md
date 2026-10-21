@@ -1,4 +1,5 @@
 ---
+name: refactor
 description: 🔧 Tái cấu trúc code
 extends: core/HARNESS.md
 tools: rig, graphify

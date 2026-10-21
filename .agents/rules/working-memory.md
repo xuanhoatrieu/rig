@@ -1,3 +1,8 @@
+---
+trigger: always_on
+description: Quy tắc duy trì bộ nhớ phiên (In-Session Working Memory & Anti-Amnesia) qua .brain/scratchpad.json và rig session.
+---
+
 # Quy Tắc Duy Trì Bộ Nhớ Phiên (In-Session Working Memory & Anti-Amnesia)
 
 Quy tắc này giải quyết triệt để hiện tượng Agent bị "mất trí nhớ" ngay trong cùng một phiên làm việc (in-session) sau khi thực hiện các lệnh trung gian (như `rig update`, build, commit, git push).

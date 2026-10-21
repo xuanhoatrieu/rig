@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Rig v5.2.3 Installer — Harness-Core Workflow Framework
+# Rig v5.3.0 Installer — Harness-Core Workflow Framework
 # Usage: curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash
 
-VERSION="5.2.3"
+VERSION="5.3.0"
 REPO="xuanhoatrieu/rig"
 GEMINI_DIR="$HOME/.gemini"
+GEMINI_CONFIG_DIR="$GEMINI_DIR/config"
+AGY_SKILLS_DIR="$GEMINI_CONFIG_DIR/skills"
+AGY_RULES_DIR="$GEMINI_CONFIG_DIR/rules"
 ANTIGRAVITY_DIR="$GEMINI_DIR/antigravity"
 RIG_CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 CODEX_SKILLS_DIR="$HOME/.agents/skills"
@@ -39,9 +42,41 @@ mkdir -p "$ANTIGRAVITY_DIR/core/patterns"
 mkdir -p "$ANTIGRAVITY_DIR/workflows"
 mkdir -p "$ANTIGRAVITY_DIR/skills"
 mkdir -p "$ANTIGRAVITY_DIR/plugins"
+mkdir -p "$AGY_SKILLS_DIR"
+mkdir -p "$AGY_RULES_DIR"
 mkdir -p "$RIG_CODEX_HOME"
 mkdir -p "$CODEX_SKILLS_DIR"
 mkdir -p "$BIN_DIR"
+
+install_agy_cli_adapter() {
+    local source_root="$1"
+    echo "⚡ Installing Antigravity CLI (agy) & Antigravity 2.0 adapter..."
+
+    if [ -d "$source_root/skills" ]; then
+        cp -r "$source_root/skills/." "$AGY_SKILLS_DIR/"
+    fi
+
+    if [ -d "$source_root/workflows" ]; then
+        for wf_file in "$source_root/workflows/"*.md; do
+            [ -f "$wf_file" ] || continue
+            local wf_name
+            wf_name="$(basename "$wf_file" .md)"
+            mkdir -p "$AGY_SKILLS_DIR/$wf_name"
+            cp "$wf_file" "$AGY_SKILLS_DIR/$wf_name/SKILL.md"
+        done
+    fi
+
+    if [ -d "$source_root/.agents/rules" ]; then
+        cp -r "$source_root/.agents/rules/." "$AGY_RULES_DIR/"
+    fi
+
+    if [ -f "$source_root/gemini.md" ]; then
+        cp "$source_root/gemini.md" "$GEMINI_DIR/GEMINI.md"
+        cp "$source_root/gemini.md" "$GEMINI_CONFIG_DIR/GEMINI.md"
+    fi
+
+    echo "✅ AGY CLI skills & workflow slash commands installed to $AGY_SKILLS_DIR"
+}
 
 install_codex_adapter() {
     local source_root="$1"
@@ -75,9 +110,12 @@ install_codex_adapter() {
 
 # ─── Install core docs, workflows, skills & binary ───
 echo "📄 Installing core docs, workflows, skills, and plugins..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
 
-if [ -d "$SCRIPT_DIR/core" ]; then
+if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/core" ]; then
     # Local installation
     cp -r "$SCRIPT_DIR/core/"* "$ANTIGRAVITY_DIR/core/"
     cp -r "$SCRIPT_DIR/workflows/"* "$ANTIGRAVITY_DIR/workflows/"
@@ -87,18 +125,19 @@ if [ -d "$SCRIPT_DIR/core" ]; then
     if [ -d "$SCRIPT_DIR/plugins" ]; then
         cp -r "$SCRIPT_DIR/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
+    install_agy_cli_adapter "$SCRIPT_DIR"
     install_codex_adapter "$SCRIPT_DIR"
 
-    if [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
-        cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
-        chmod +x "$BIN_DIR/rig"
-        echo "✅ rig binary installed from local release build"
-    elif [ -d "$SCRIPT_DIR/cli" ] && command -v cargo &>/dev/null; then
+    if [ -d "$SCRIPT_DIR/cli" ] && command -v cargo &>/dev/null; then
         echo "🔨 Building rig from source with cargo..."
         cargo build --release --manifest-path "$SCRIPT_DIR/cli/Cargo.toml"
         cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
         chmod +x "$BIN_DIR/rig"
         echo "✅ rig binary built and installed to $BIN_DIR/rig"
+    elif [ -f "$SCRIPT_DIR/cli/target/release/rig" ]; then
+        cp "$SCRIPT_DIR/cli/target/release/rig" "$BIN_DIR/rig"
+        chmod +x "$BIN_DIR/rig"
+        echo "✅ rig binary installed from local release build"
     fi
     echo "✅ Core docs, workflows, skills, and plugins installed from local repo"
 else
@@ -114,6 +153,7 @@ else
     if [ -d "$TMPDIR/rig-main/plugins" ]; then
         cp -r "$TMPDIR/rig-main/plugins/"* "$ANTIGRAVITY_DIR/plugins/"
     fi
+    install_agy_cli_adapter "$TMPDIR/rig-main"
     install_codex_adapter "$TMPDIR/rig-main"
 
     # Download pre-built release binary or compile with cargo
@@ -136,7 +176,7 @@ else
         echo "📦 Creating fallback rig bash CLI wrapper..."
         cat << 'EOF' > "$BIN_DIR/rig"
 #!/usr/bin/env bash
-VERSION="5.2.3"
+VERSION="5.3.0"
 case "${1:-help}" in
     update)
         curl -fsSL https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.sh | bash
@@ -178,14 +218,6 @@ if [ -f "$BIN_DIR/rig" ]; then
     chmod +x "$BIN_DIR/rig"
 fi
 
-# ─── Install GEMINI.md ───
-echo "📝 Installing GEMINI.md..."
-if [ -f "$SCRIPT_DIR/gemini.md" ]; then
-    cp "$SCRIPT_DIR/gemini.md" "$GEMINI_DIR/GEMINI.md"
-else
-    curl -fsSL "https://raw.githubusercontent.com/${REPO}/main/gemini.md" -o "$GEMINI_DIR/GEMINI.md"
-fi
-
 # ─── Save version ───
 echo "$VERSION" > "$GEMINI_DIR/rig_version"
 
@@ -224,6 +256,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "📁 Installed to:"
 echo "   Binary:    $BIN_DIR/rig"
+echo "   AGY CLI:   $AGY_SKILLS_DIR/ & $AGY_RULES_DIR/"
 echo "   Core:      $ANTIGRAVITY_DIR/core/"
 echo "   Workflows: $ANTIGRAVITY_DIR/workflows/"
 echo "   Skills:    $ANTIGRAVITY_DIR/skills/"
@@ -233,7 +266,7 @@ echo "   Codex:     $CODEX_SKILLS_DIR/"
 echo "   AGENTS.md: $RIG_CODEX_HOME/AGENTS.md"
 echo ""
 echo "🎮 Quick start:"
-echo "   Antigravity: type /init in AI chat"
+echo "   AGY CLI / Antigravity: type /init or \$rig-harness in chat"
 echo '   Codex: start a new task and invoke $rig-harness'
 echo "   Or run: rig doctor"
 echo "   To update later, run: rig update"

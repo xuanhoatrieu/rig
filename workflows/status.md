@@ -1,4 +1,5 @@
 ---
+name: status
 description: 🧭 Tình trạng & Bước tiếp theo
 extends: core/HARNESS.md
 tools: rig

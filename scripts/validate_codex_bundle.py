@@ -55,6 +55,30 @@ def main() -> int:
         if manifest.get("skills") != "./skills/":
             errors.append("Plugin manifest must expose ./skills/.")
 
+    agy_manifest_path = ROOT / ".antigravity-plugin" / "plugin.json"
+    try:
+        agy_manifest = json.loads(agy_manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        errors.append(f"Invalid Antigravity plugin manifest: {error}")
+    else:
+        if agy_manifest.get("name") != "rig":
+            errors.append("Antigravity plugin manifest name must be 'rig'.")
+
+    agy_skills_path = ROOT / ".agents" / "skills.json"
+    try:
+        agy_skills = json.loads(agy_skills_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        errors.append(f"Invalid .agents/skills.json: {error}")
+    else:
+        entries = agy_skills.get("entries", [])
+        if not any(isinstance(e, dict) and e.get("path") == "skills" for e in entries):
+            errors.append(".agents/skills.json must register 'skills'.")
+
+    for rule_file in sorted((ROOT / ".agents" / "rules").glob("*.md")):
+        rule_text = rule_file.read_text(encoding="utf-8")
+        if not (rule_text.startswith("---\n") or rule_text.startswith("---\r\n")) or "trigger:" not in rule_text:
+            errors.append(f"Missing trigger frontmatter in workspace rule: {rule_file.relative_to(ROOT)}")
+
     agents_template = (ROOT / "codex" / "AGENTS.md").read_text(encoding="utf-8")
     if agents_template.count("<!-- RIG_CODEX:BEGIN -->") != 1 or agents_template.count(
         "<!-- RIG_CODEX:END -->"
@@ -76,6 +100,19 @@ def main() -> int:
             ebook_skill / "scripts" / script_name,
             errors,
         )
+    for wf_name in ("textbook.md", "pptx.md", "question.md", "video.md", "export.md"):
+        require_equal(
+            ROOT / "workflows" / wf_name,
+            ROOT / "plugins" / "education" / "workflows" / wf_name,
+            errors,
+        )
+
+    for wf_file in sorted((ROOT / "workflows").glob("*.md")):
+        wf_text = wf_file.read_text(encoding="utf-8")
+        if not wf_text.startswith("---\n") and not wf_text.startswith("---\r\n"):
+            errors.append(f"Missing workflow frontmatter: {wf_file.relative_to(ROOT)}")
+        if "name:" not in wf_text or "description:" not in wf_text:
+            errors.append(f"Workflow frontmatter must have name and description for AGY CLI skill conversion: {wf_file.relative_to(ROOT)}")
 
     for skill_file in sorted((ROOT / "skills").glob("*/SKILL.md")):
         text = skill_file.read_text(encoding="utf-8")
@@ -85,6 +122,9 @@ def main() -> int:
             errors.append(f"Incomplete skill frontmatter: {skill_file.relative_to(ROOT)}")
         if "~/.gemini/antigravity" in text:
             errors.append(f"Codex skill contains an Antigravity-only path: {skill_file.relative_to(ROOT)}")
+        parts = text.split("---", 2)
+        if len(parts) == 3 and len(parts[2].encode("utf-8")) > 24000:
+            errors.append(f"Skill body exceeds AGY CLI 24,000-byte limit: {skill_file.relative_to(ROOT)}")
 
     if errors:
         for error in errors:

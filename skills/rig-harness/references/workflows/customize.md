@@ -1,4 +1,5 @@
 ---
+name: customize
 description: ⚙️ Tùy chỉnh preferences
 ---
 

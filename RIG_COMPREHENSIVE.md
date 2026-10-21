@@ -1,6 +1,6 @@
-# 📖 Rig — Harness-Core Workflow Framework v5.2.3 Comprehensive Specification
+# 📖 Rig — Harness-Core Workflow Framework v5.3.0 Comprehensive Specification
 
-Rig is a workflow operating framework designed to govern how AI coding agents collaborate with humans. This document acts as the complete, self-contained specification of Rig v5.2.3. It details the architecture, file structures, CLI mechanics, SQLite schema, workflows, skills, and release pipeline.
+Rig is a workflow operating framework designed to govern how AI coding agents collaborate with humans. This document acts as the complete, self-contained specification of Rig v5.3.0. It details the architecture, file structures, CLI mechanics, SQLite schema, workflows, skills, and release pipeline.
 
 ---
 

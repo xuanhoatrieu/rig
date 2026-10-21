@@ -1,18 +1,19 @@
-# 🔧 Rig — Harness-Core Workflow Framework v5.2.3
+# 🔧 Rig — Harness-Core Workflow Framework v5.3.0
 
-Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm. Cùng một repository hỗ trợ cả **OpenAI Codex** và **Gemini Antigravity**.
+Rig biến AI coding agent thành đồng nghiệp có quy trình — biết phân loại rủi ro, duy trì repository là single source of truth, mã hóa invariant kiểm thử 2 chiều, theo dõi tiến độ, ghi nhận quyết định, và tự cải thiện qua bằng chứng thực nghiệm. Cùng một repository hỗ trợ **Antigravity CLI (`agy`)**, **Antigravity IDE (2.0)** và **OpenAI Codex**.
 
 > **Triết lý:** Harness là core (quản lý QUY TRÌNH & INVARIANTS), Workflows là overlays (hướng dẫn CÁCH LÀM), Skills là công cụ chuyên sâu.
 > **Tham khảo:** Inspired by [Harness Engineering](https://openai.com/index/harness-engineering/) & [repository-harness](https://github.com/hoangnb24/repository-harness).
 
-## ✨ Highlights v5.2.0
+## ✨ Highlights v5.3.0
 
 | Feature | Chi tiết |
 |---|---|
+| **AGY CLI Native Support** | Tự động cài đặt skills, slash commands & rules chuẩn `~/.gemini/config/` và `.antigravity-plugin/plugin.json` cho `agy` CLI |
 | **Harness-Core Protocol v2** | 4 Work Shapes: Read-only, Bounded change, Durable planned change (`docs/plans/`), Invariant encoding |
 | **Invariant Encoding** | Mã hóa quy tắc kiến trúc/bảo mật thành native validation có kiểm chứng 2 chiều (Positive & Negative proof) |
-| **Rust CLI `rig`** | SQLite durable layer + `rig doctor` chẩn đoán toàn vẹn + `rig plan` quản lý kế hoạch |
-| **Codex + Antigravity** | Codex plugin/skills/`AGENTS.md` và Gemini `GEMINI.md` dùng chung Harness Core |
+| **Rust CLI `rig`** | SQLite durable layer + `rig doctor` chẩn đoán toàn vẹn + `rig plan` + `rig session get/set` + `rig story verify-all` |
+| **Codex + Antigravity** | AGY CLI (`~/.gemini/config/`), Antigravity IDE và Codex (`AGENTS.md` / `.codex-plugin/`) dùng chung Harness Core |
 | **6 Harness Skills** | `$rig-harness`, `$encode-invariant`, `$onboard-repository`, `$audit-onboarding-proposal`, `$improve-harness`, `$engineering-wisdom` |
 | **15 Workflow Overlays** | Mỗi file ≤5KB, chỉ chứa logic đặc thù (không copy-paste) |
 | **Risk Lanes & Hard Gates** | 10 risk flags, 3 lanes (tiny/normal/high-risk), 5 hard gates bắt buộc |
@@ -42,8 +43,12 @@ Một lần cài cấu hình cả Codex và Antigravity. Xem hướng dẫn Code
 ```
 ~/.gemini/                           # Global (mọi dự án)
 ├── GEMINI.md                        # Entry point (~25 dòng)
-├── rig_version                      # 5.2.3
-└── antigravity/
+├── rig_version                      # 5.3.0
+├── config/                          # AGY CLI & Antigravity 2.0 Global Config
+│   ├── GEMINI.md                    # Global rules
+│   ├── rules/                       # Workspace/global rules với trigger frontmatter
+│   └── skills/                      # 11 Harness/Education skills + 21 slash-command skills
+└── antigravity/                     # Legacy Antigravity compatibility
     ├── core/                        # Harness source of truth & rules
     │   ├── HARNESS.md               # Task loop & rules
     │   ├── WORKFLOW.md              # 4 Work shapes & flows

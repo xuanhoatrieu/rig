@@ -1,4 +1,5 @@
 ---
+name: brainstorm
 description: 💡 Brainstorm & Research ý tưởng
 extends: core/HARNESS.md
 tools: search_web

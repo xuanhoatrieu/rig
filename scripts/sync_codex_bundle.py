@@ -59,7 +59,15 @@ def main() -> None:
             ebook_skill,
         )
 
-    print("Codex skill resources synchronized.")
+    edu_workflows_dir = ROOT / "plugins" / "education" / "workflows"
+    for wf_name in ("textbook.md", "pptx.md", "question.md", "video.md", "export.md"):
+        sync_file(
+            ROOT / "workflows" / wf_name,
+            edu_workflows_dir / wf_name,
+            edu_workflows_dir,
+        )
+
+    print("Codex and Antigravity skill resources synchronized.")
 
 
 if __name__ == "__main__":

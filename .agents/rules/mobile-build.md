@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Quy tắc xây dựng và phát hành Mobile App (Expo / React Native) chuẩn doanh nghiệp 3 tầng (APK local-only, AAB CH Play, IPA App Store). Áp dụng khi user yêu cầu apk, build apk, test local, build store, ch play, hoặc app store.
+---
+
 # Quy Tắc Xây Dựng & Phát Hành Mobile App Chuẩn Doanh Nghiệp (Expo / React Native)
 
 Quy tắc này áp dụng khi người dùng yêu cầu: "apk", "build apk", "test local", "build store", "ch play", "google play", "app store", "apple store", "phát hành app".

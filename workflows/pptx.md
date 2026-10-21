@@ -1,4 +1,5 @@
 ---
+name: pptx
 description: 🎞️ Tạo slide PPTX + TTS audio
 ---
 

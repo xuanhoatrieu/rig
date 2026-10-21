@@ -1,12 +1,12 @@
-# Rig — Harness-Core Workflow Framework v5.2.3
+# Rig — Harness-Core Workflow Framework v5.3.0
 
 ## Core Rule — ÁP DỤNG CHO MỌI REQUEST
 Mọi request (cả ngôn ngữ tự nhiên, / commands, lẫn $ skills) đều đi qua Harness Task Loop:
-1. Đọc core/HARNESS.md & core/WORKFLOW.md → hiểu task loop và work shape
-2. Đọc core/communication-style.md → quy tắc giao tiếp
+1. Đọc `core/HARNESS.md` & `core/WORKFLOW.md` (hoặc tại `~/.gemini/config/skills/rig-harness/references/core/` / `~/.gemini/antigravity/core/`) → hiểu task loop và work shape
+2. Đọc `core/communication-style.md` (hoặc tại `~/.gemini/config/skills/rig-harness/references/core/` / `~/.gemini/antigravity/core/`) → quy tắc giao tiếp
 3. Phân loại request → xác định workflow/skill + risk lane
-4. Chạy `rig intake` → ghi nhận classification (Bỏ qua intake đối với các lệnh CLI/bảo trì trực tiếp: `rig update`, `rig doctor`, `rig status`)
-5. Đọc workflow overlay tương ứng trong ~/.gemini/antigravity/workflows/ hoặc skill trong ~/.gemini/antigravity/skills/
+4. Chạy `rig intake` → ghi nhận classification (Bỏ qua intake đối với read-only request hoặc các lệnh CLI/bảo trì trực tiếp: `rig update`, `rig doctor`, `rig status`)
+5. Đọc workflow/skill tương ứng trong `~/.gemini/config/skills/` (AGY CLI / Antigravity 2.0) hoặc `~/.gemini/antigravity/workflows/` & `~/.gemini/antigravity/skills/`
 6. Work → Validate (positive & negative proof nếu encode invariant) → `rig trace` → Close
 
 ## Trigger Logic

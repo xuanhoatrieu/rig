@@ -1,4 +1,5 @@
 ---
+name: plan
 description: 📋 Lên kế hoạch tính năng & Durable Plans
 extends: core/HARNESS.md
 tools: rig, graphify

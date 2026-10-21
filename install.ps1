@@ -1,10 +1,13 @@
-# Rig v5.2.3 Installer — Windows PowerShell
+# Rig v5.3.0 Installer — Windows PowerShell
 # Usage: iex "& { $(irm https://raw.githubusercontent.com/xuanhoatrieu/rig/main/install.ps1) }"
 
 $ErrorActionPreference = "Stop"
-$Version = "5.2.3"
+$Version = "5.3.0"
 $Repo = "xuanhoatrieu/rig"
 $GeminiDir = "$env:USERPROFILE\.gemini"
+$GeminiConfigDir = "$GeminiDir\config"
+$AgySkillsDir = "$GeminiConfigDir\skills"
+$AgyRulesDir = "$GeminiConfigDir\rules"
 $AntigravityDir = "$GeminiDir\antigravity"
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { "$env:USERPROFILE\.codex" }
 $CodexSkillsDir = "$env:USERPROFILE\.agents\skills"
@@ -18,39 +21,52 @@ New-Item -ItemType Directory -Force -Path "$AntigravityDir\core\patterns" | Out-
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\workflows" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\skills" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AntigravityDir\plugins" | Out-Null
+New-Item -ItemType Directory -Force -Path $AgySkillsDir | Out-Null
+New-Item -ItemType Directory -Force -Path $AgyRulesDir | Out-Null
 New-Item -ItemType Directory -Force -Path $CodexHome | Out-Null
 New-Item -ItemType Directory -Force -Path $CodexSkillsDir | Out-Null
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 
-# ─── Download and extract repo ───
-Write-Host "📄 Downloading core docs, workflows, skills, and plugins..."
-$TmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
-$ZipUrl = "https://github.com/$Repo/archive/refs/heads/main.zip"
+function Install-RigFromRoot {
+    param([string]$SourceRoot)
 
-try {
-    $ZipPath = "$TmpDir\rig.zip"
-    Invoke-WebRequest -Uri $ZipUrl -OutFile $ZipPath -UseBasicParsing
-    Expand-Archive -Path $ZipPath -DestinationPath $TmpDir -Force
-
-    Copy-Item -Recurse -Force "$TmpDir\rig-main\core\*" "$AntigravityDir\core\"
-    Copy-Item -Recurse -Force "$TmpDir\rig-main\workflows\*" "$AntigravityDir\workflows\"
-    if (Test-Path "$TmpDir\rig-main\skills") {
-        Copy-Item -Recurse -Force "$TmpDir\rig-main\skills\*" "$AntigravityDir\skills\"
+    Copy-Item -Recurse -Force "$SourceRoot\core\*" "$AntigravityDir\core\"
+    Copy-Item -Recurse -Force "$SourceRoot\workflows\*" "$AntigravityDir\workflows\"
+    if (Test-Path "$SourceRoot\skills") {
+        Copy-Item -Recurse -Force "$SourceRoot\skills\*" "$AntigravityDir\skills\"
+        Get-ChildItem "$SourceRoot\skills" -Directory | ForEach-Object {
+            $TargetAgySkill = Join-Path $AgySkillsDir $_.Name
+            New-Item -ItemType Directory -Force -Path $TargetAgySkill | Out-Null
+            Copy-Item -Recurse -Force "$($_.FullName)\*" "$TargetAgySkill\"
+        }
     }
-    if (Test-Path "$TmpDir\rig-main\plugins") {
-        Copy-Item -Recurse -Force "$TmpDir\rig-main\plugins\*" "$AntigravityDir\plugins\"
+    if (Test-Path "$SourceRoot\workflows") {
+        Get-ChildItem "$SourceRoot\workflows\*.md" -File | ForEach-Object {
+            $WfName = $_.BaseName
+            $TargetWfSkill = Join-Path $AgySkillsDir $WfName
+            New-Item -ItemType Directory -Force -Path $TargetWfSkill | Out-Null
+            Copy-Item -Force $_.FullName (Join-Path $TargetWfSkill "SKILL.md")
+        }
     }
-    Copy-Item -Force "$TmpDir\rig-main\gemini.md" "$GeminiDir\GEMINI.md"
+    if (Test-Path "$SourceRoot\.agents\rules") {
+        Copy-Item -Recurse -Force "$SourceRoot\.agents\rules\*" "$AgyRulesDir\"
+    }
+    if (Test-Path "$SourceRoot\plugins") {
+        Copy-Item -Recurse -Force "$SourceRoot\plugins\*" "$AntigravityDir\plugins\"
+    }
+    Copy-Item -Force "$SourceRoot\gemini.md" "$GeminiDir\GEMINI.md"
+    Copy-Item -Force "$SourceRoot\gemini.md" "$GeminiConfigDir\GEMINI.md"
+    Write-Host "✅ AGY CLI skills & workflow slash commands installed to $AgySkillsDir" -ForegroundColor Green
 
     # Install Codex skills and merge only the managed Rig guidance block.
     Write-Host "🤖 Installing Codex adapter..." -ForegroundColor Cyan
-    Get-ChildItem "$TmpDir\rig-main\skills" -Directory | ForEach-Object {
+    Get-ChildItem "$SourceRoot\skills" -Directory | ForEach-Object {
         $TargetSkill = Join-Path $CodexSkillsDir $_.Name
         New-Item -ItemType Directory -Force -Path $TargetSkill | Out-Null
         Copy-Item -Recurse -Force "$($_.FullName)\*" "$TargetSkill\"
     }
 
-    $ManagedBlock = (Get-Content -Raw "$TmpDir\rig-main\codex\AGENTS.md").Trim()
+    $ManagedBlock = (Get-Content -Raw "$SourceRoot\codex\AGENTS.md").Trim()
     $CodexAgentsPath = Join-Path $CodexHome "AGENTS.md"
     $ManagedPattern = '(?s)<!-- RIG_CODEX:BEGIN -->.*?<!-- RIG_CODEX:END -->'
     if (Test-Path $CodexAgentsPath) {
@@ -66,6 +82,25 @@ try {
     Set-Content -Path $CodexAgentsPath -Value $UpdatedAgents -Encoding utf8
     Set-Content -Path (Join-Path $CodexHome "rig_version") -Value $Version
     Write-Host "✅ Codex skills installed to $CodexSkillsDir" -ForegroundColor Green
+}
+
+# ─── Download and extract repo (or use local repo) ───
+Write-Host "📄 Installing core docs, workflows, skills, and plugins..."
+$TmpDir = $null
+
+try {
+    if ($PSScriptRoot -and (Test-Path "$PSScriptRoot\core")) {
+        $SourceRoot = $PSScriptRoot
+    } else {
+        $TmpDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+        $ZipUrl = "https://github.com/$Repo/archive/refs/heads/main.zip"
+        $ZipPath = "$TmpDir\rig.zip"
+        Invoke-WebRequest -Uri $ZipUrl -OutFile $ZipPath -UseBasicParsing
+        Expand-Archive -Path $ZipPath -DestinationPath $TmpDir -Force
+        $SourceRoot = "$TmpDir\rig-main"
+    }
+
+    Install-RigFromRoot -SourceRoot $SourceRoot
 
     # Download pre-built binary or compile with cargo
     $BinaryName = "rig-windows-x86_64.exe"
@@ -82,8 +117,8 @@ try {
 
     if (-not $Downloaded -and (Get-Command cargo -ErrorAction SilentlyContinue)) {
         Write-Host "🔨 Compiling rig CLI from source with cargo..." -ForegroundColor Cyan
-        cargo build --release --manifest-path "$TmpDir\rig-main\cli\Cargo.toml"
-        Copy-Item "$TmpDir\rig-main\cli\target\release\rig.exe" "$BinDir\rig.exe"
+        cargo build --release --manifest-path "$SourceRoot\cli\Cargo.toml"
+        Copy-Item "$SourceRoot\cli\target\release\rig.exe" "$BinDir\rig.exe"
         $Downloaded = $true
         Write-Host "✅ rig.exe compiled and installed to $BinDir\rig.exe" -ForegroundColor Green
     }
@@ -172,7 +207,9 @@ switch (`$cmd) {
         Write-Host "✅ rig CLI command wrapper ready in $BinDir" -ForegroundColor Green
     }
 
-    Remove-Item -Recurse -Force $TmpDir
+    if ($TmpDir -and (Test-Path $TmpDir)) {
+        Remove-Item -Recurse -Force $TmpDir
+    }
     Write-Host "✅ Core docs, workflows, skills, and plugins installed" -ForegroundColor Green
 } catch {
     Write-Host "❌ Installation failed: $_" -ForegroundColor Red
@@ -196,13 +233,14 @@ Write-Host "━━━━━━━━━━━━━━━━━━━━━━�
 Write-Host "✅ Rig v$Version installed!" -ForegroundColor Green
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "📁 Core:      $AntigravityDir\core\"
+Write-Host "📁 AGY CLI:   $AgySkillsDir\ & $AgyRulesDir\"
+Write-Host "   Core:      $AntigravityDir\core\"
 Write-Host "   Workflows: $AntigravityDir\workflows\"
 Write-Host "   Skills:    $AntigravityDir\skills\"
 Write-Host "   Plugins:   $AntigravityDir\plugins\"
 Write-Host "   Codex:     $CodexSkillsDir\"
 Write-Host "   AGENTS.md: $CodexHome\AGENTS.md"
 Write-Host ""
-Write-Host "🎮 Antigravity: type /init in AI chat"
+Write-Host "🎮 AGY CLI / Antigravity: type /init or `$rig-harness in AI chat"
 Write-Host "   Codex: start a new task and invoke `$rig-harness"
 Write-Host "   To update later, run: rig update"

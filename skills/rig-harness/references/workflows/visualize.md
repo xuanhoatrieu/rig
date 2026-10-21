@@ -1,4 +1,5 @@
 ---
+name: visualize
 description: 🎨 Thiết kế UI/UX mockup
 extends: core/HARNESS.md
 tools: generate_image
